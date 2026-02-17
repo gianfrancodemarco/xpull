@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>xpull - UX Design Directions</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2e;
+      --panel-elev: #1a2440;
+      --text: #eaf0ff;
+      --muted: #a9b4d0;
+      --primary: #7c4dff;
+      --secondary: #00d1ff;
+      --accent: #ffc857;
+      --success: #32d583;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% -20%, #2a1e59 0%, var(--bg) 45%) fixed;
+      line-height: 1.4;
+    }
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    h1, h2, h3 { margin: 0; font-family: Sora, Inter, sans-serif; }
+    h1 { font-size: 32px; margin-bottom: 8px; }
+    .intro { color: var(--muted); margin-bottom: 24px; }
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .chip {
+      background: #111930;
+      border: 1px solid #2c3860;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .dirs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 18px;
+    }
+    .dir {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0) 28%), var(--panel);
+      border: 1px solid #2e3b67;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .dir:hover { transform: translateY(-3px); border-color: #5d72b4; }
+    .dir-h {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #273155;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .dir-h small { color: var(--muted); }
+    .mock {
+      padding: 14px;
+      background: #0f172d;
+      min-height: 280px;
+    }
+    .bar {
+      background: #182443;
+      border: 1px solid #2b3b66;
+      border-radius: 10px;
+      height: 36px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #d6def7;
+      font-size: 13px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 10px;
+    }
+    .card {
+      background: var(--panel-elev);
+      border: 1px solid #2f3b63;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 92px;
+    }
+    .card h4 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-family: Inter, sans-serif;
+      color: #dce6ff;
+    }
+    .meta { color: var(--muted); font-size: 12px; }
+    .xp {
+      margin-top: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #202d4d;
+      overflow: hidden;
+    }
+    .xp > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    .tags { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px;
+      border: 1px solid #3b4d7f;
+      color: #c8d4f5;
+      border-radius: 99px;
+      padding: 2px 8px;
+    }
+    .note {
+      padding: 12px 14px;
+      border-top: 1px solid #273155;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .a { --primary: #7c4dff; --secondary: #00d1ff; --accent: #ffc857; }
+    .b { --primary: #6f89ff; --secondary: #79ffd2; --accent: #ffd37a; }
+    .c { --primary: #a35bff; --secondary: #ff7ad9; --accent: #ffcf66; }
+    .d { --primary: #7c4dff; --secondary: #20e0ff; --accent: #91ff7a; }
+    .e { --primary: #4f70ff; --secondary: #00d1ff; --accent: #ffc857; }
+    .f { --primary: #8754ff; --secondary: #8ff0ff; --accent: #ffc857; }
+    .footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>xpull Design Direction Showcase</h1>
+    <p class="intro">
+      Six visual directions built from the approved foundation (MUI, dark-first neo-arcade, playful RPG energy, high trust clarity).
+      Compare layout hierarchy, density, and progression emphasis.
+    </p>
+
+    <div class="legend">
+      <div class="chip"><strong>Evaluate:</strong> Layout Intuitiveness</div>
+      <div class="chip"><strong>Evaluate:</strong> Interaction Style</div>
+      <div class="chip"><strong>Evaluate:</strong> Visual Weight</div>
+      <div class="chip"><strong>Evaluate:</strong> Brand Alignment</div>
+      <div class="chip"><strong>Evaluate:</strong> Mobile Parity</div>
+      <div class="chip"><strong>Evaluate:</strong> Progression Clarity</div>
+    </div>
+
+    <section class="dirs">
+      <article class="dir a">
+        <div class="dir-h">
+          <h2>Direction 1 - Progress Hub</h2>
+          <small>Balanced / Dashboard-first</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Top Nav · XP Delta · Alerts</div>
+          <div class="row">
+            <div class="card"><h4>Weekly Progress</h4><div class="meta">+840 XP · Level 12</div><div class="xp"><span style="width:65%"></span></div><div class="tags"><span class="tag">TypeScript +1</span><span class="tag">Review +2</span></div></div>
+            <div class="card"><h4>Next Unlock</h4><div class="meta">Bug Slayer IV</div><div class="xp"><span style="width:42%"></span></div></div>
+          </div>
+          <div class="card" style="margin-top:10px"><h4>Skill Tree Snapshot</h4><div class="meta">Pan/zoom mini-tree with highlighted growth path</div></div>
+        </div>
+        <div class="note">Best for immediate progression clarity and habitual return loop.</div>
+      </article>
+
+      <article class="dir b">
+        <div class="dir-h">
+          <h2>Direction 2 - Story Feed</h2>
+          <small>Narrative / Timeline-first</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Narrative Header · "Your week in code"</div>
+          <div class="card"><h4>Milestone Story Card</h4><div class="meta">"You unlocked Polyglot branch after 3 reviews and 11 commits."</div><div class="tags"><span class="tag">Share</span><span class="tag">Explain Why</span></div></div>
+          <div class="card" style="margin-top:10px"><h4>Progress Timeline</h4><div class="meta">Chronological events with confidence/trust indicators</div></div>
+          <div class="card" style="margin-top:10px"><h4>Next Suggested Action</h4><div class="meta">Review 2 PRs to advance Reviewer node</div></div>
+        </div>
+        <div class="note">Best for inspiration and emotional continuity after Unboxing.</div>
+      </article>
+
+      <article class="dir c">
+        <div class="dir-h">
+          <h2>Direction 3 - RPG Chamber</h2>
+          <small>Immersive / High visual drama</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Avatar + Level Crest + League Ring</div>
+          <div class="row">
+            <div class="card"><h4>Skill Galaxy View</h4><div class="meta">Branch constellations with glow intensity by mastery</div></div>
+            <div class="card"><h4>Quest Rail</h4><div class="meta">Micro-goals, no pressure streaks</div></div>
+          </div>
+          <div class="card" style="margin-top:10px"><h4>Unboxing Replay CTA</h4><div class="meta">Replay key milestones in condensed cinematic mode</div></div>
+        </div>
+        <div class="note">Best for uniqueness and wow factor; requires strict clarity guardrails.</div>
+      </article>
+
+      <article class="dir d">
+        <div class="dir-h">
+          <h2>Direction 4 - Utility Minimal</h2>
+          <small>Data-trust / Low ornament</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Compact Header · Filters · Date Range</div>
+          <div class="row">
+            <div class="card"><h4>XP Breakdown Table</h4><div class="meta">Commits, PRs, Reviews, Quality multipliers</div></div>
+            <div class="card"><h4>Sync Health</h4><div class="meta">Freshness + source status</div></div>
+          </div>
+          <div class="card" style="margin-top:10px"><h4>Progress Graph</h4><div class="meta">Clear chart-first hierarchy for power users</div></div>
+        </div>
+        <div class="note">Best for trust and legibility; weakest on emotional delight.</div>
+      </article>
+
+      <article class="dir e">
+        <div class="dir-h">
+          <h2>Direction 5 - Mobile-first Stack</h2>
+          <small>Card stack / Touch-priority</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Bottom Nav · Progress · Profile · Share</div>
+          <div class="card"><h4>Daily Snapshot Card</h4><div class="meta">One-screen summary optimized for quick checks</div><div class="xp"><span style="width:54%"></span></div></div>
+          <div class="card" style="margin-top:10px"><h4>Swipe Skill Branches</h4><div class="meta">Touch gestures with clear fallback controls</div></div>
+          <div class="card" style="margin-top:10px"><h4>Share-ready Profile Card</h4><div class="meta">One-tap export with OG preview</div></div>
+        </div>
+        <div class="note">Best for near-parity mobile ambition and daily habit loops.</div>
+      </article>
+
+      <article class="dir f">
+        <div class="dir-h">
+          <h2>Direction 6 - Hybrid Recommended</h2>
+          <small>Progress Hub + Narrative + Mobile parity</small>
+        </div>
+        <div class="mock">
+          <div class="bar">Progress-first shell · Personalized story modules</div>
+          <div class="row">
+            <div class="card"><h4>Top: XP + Next Unlock</h4><div class="meta">Fast clarity, no hunting for key state</div><div class="xp"><span style="width:68%"></span></div></div>
+            <div class="card"><h4>Moment Card</h4><div class="meta">"What changed since last visit"</div></div>
+          </div>
+          <div class="card" style="margin-top:10px"><h4>Skill Tree + Suggested Path</h4><div class="meta">Trust cues + inspiration cues side by side</div></div>
+          <div class="card" style="margin-top:10px"><h4>Adaptive Layout</h4><div class="meta">Desktop split view, mobile stacked cards</div></div>
+        </div>
+        <div class="note">Strongest match to current goals: inspiration, clarity, and repeat use.</div>
+      </article>
+    </section>
+
+    <p class="footer">
+      Suggested selection flow: pick one base direction, then optionally combine components from others (e.g., D1 hierarchy + D2 narrative cards + D5 mobile patterns).
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>xpull Color Themes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #0b1020;
+      color: #eaf0ff;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 6px; font-family: Sora, Inter, sans-serif; }
+    p { margin: 0 0 18px; color: #a9b4d0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .swatch {
+      border: 1px solid #2d3962;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #121a2e;
+    }
+    .tone { height: 80px; }
+    .meta { padding: 10px; font-size: 13px; color: #cdd8f8; }
+    .k { color: #8ea0d7; display: block; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>xpull Color Theme Visualizer</h1>
+  <p>Approved "Neo Arcade" token set for UI implementation.</p>
+
+  <div class="grid">
+    <div class="swatch"><div class="tone" style="background:#7C4DFF"></div><div class="meta"><span class="k">Primary</span>#7C4DFF</div></div>
+    <div class="swatch"><div class="tone" style="background:#00D1FF"></div><div class="meta"><span class="k">Secondary</span>#00D1FF</div></div>
+    <div class="swatch"><div class="tone" style="background:#FFC857"></div><div class="meta"><span class="k">Accent</span>#FFC857</div></div>
+    <div class="swatch"><div class="tone" style="background:#32D583"></div><div class="meta"><span class="k">Success</span>#32D583</div></div>
+    <div class="swatch"><div class="tone" style="background:#F5A524"></div><div class="meta"><span class="k">Warning</span>#F5A524</div></div>
+    <div class="swatch"><div class="tone" style="background:#FF5A7A"></div><div class="meta"><span class="k">Error</span>#FF5A7A</div></div>
+    <div class="swatch"><div class="tone" style="background:#0B1020"></div><div class="meta"><span class="k">Background</span>#0B1020</div></div>
+    <div class="swatch"><div class="tone" style="background:#121A2E"></div><div class="meta"><span class="k">Surface</span>#121A2E</div></div>
+    <div class="swatch"><div class="tone" style="background:#1A2440"></div><div class="meta"><span class="k">Surface Elevated</span>#1A2440</div></div>
+    <div class="swatch"><div class="tone" style="background:#EAF0FF"></div><div class="meta"><span class="k">Text Primary</span>#EAF0FF</div></div>
+    <div class="swatch"><div class="tone" style="background:#A9B4D0"></div><div class="meta"><span class="k">Text Secondary</span>#A9B4D0</div></div>
+  </div>
+</body>
+</html>
