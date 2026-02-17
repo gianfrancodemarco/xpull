@@ -1,5 +1,5 @@
 name: create-story
-description: "Create the next user story from epics+stories with enhanced context analysis and direct ready-for-dev marking"
+description: "Create the next user story with enhanced context analysis — reads from GitHub, enriches the GitHub issue with full dev context"
 author: "BMad"
 
 # Critical variables from config
@@ -12,6 +12,10 @@ date: system-generated
 planning_artifacts: "{config_source}:planning_artifacts"
 implementation_artifacts: "{config_source}:implementation_artifacts"
 
+# GitHub Configuration
+github_owner: "{config_source}:github_owner"
+github_repo: "{config_source}:github_repo"
+
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/create-story"
 template: "{installed_path}/template.md"
@@ -19,35 +23,34 @@ instructions: "{installed_path}/instructions.xml"
 validation: "{installed_path}/checklist.md"
 
 # Variables and inputs
-sprint_status: "{implementation_artifacts}/sprint-status.yaml" # Primary source for story tracking
-epics_file: "{planning_artifacts}/epics.md" # Enhanced epics+stories with BDD and source hints
-prd_file: "{planning_artifacts}/prd.md" # Fallback for requirements (if not in epics file)
-architecture_file: "{planning_artifacts}/architecture.md" # Fallback for constraints (if not in epics file)
-ux_file: "{planning_artifacts}/*ux*.md" # Fallback for UX requirements (if not in epics file)
-story_title: "" # Will be elicited if not derivable
+# Tracking is GitHub-based: stories are issues with labels
+# Story discovery: search for issues with labels `story` + `backlog`
+epics_file: "{planning_artifacts}/epics.md"
+prd_file: "{planning_artifacts}/prd.md"
+architecture_file: "{planning_artifacts}/architecture.md"
+ux_file: "{planning_artifacts}/*ux*.md"
+story_title: ""
 project_context: "**/project-context.md"
-default_output_file: "{implementation_artifacts}/{{story_key}}.md"
 
-# Smart input file references - Simplified for enhanced approach
-# The epics+stories file should contain everything needed with source hints
+# Smart input file references
 input_file_patterns:
   prd:
     description: "PRD (fallback - epics file should have most content)"
     whole: "{planning_artifacts}/*prd*.md"
     sharded: "{planning_artifacts}/*prd*/*.md"
-    load_strategy: "SELECTIVE_LOAD" # Only load if needed
+    load_strategy: "SELECTIVE_LOAD"
   architecture:
     description: "Architecture (fallback - epics file should have relevant sections)"
     whole: "{planning_artifacts}/*architecture*.md"
     sharded: "{planning_artifacts}/*architecture*/*.md"
-    load_strategy: "SELECTIVE_LOAD" # Only load if needed
+    load_strategy: "SELECTIVE_LOAD"
   ux:
     description: "UX design (fallback - epics file should have relevant sections)"
     whole: "{planning_artifacts}/*ux*.md"
     sharded: "{planning_artifacts}/*ux*/*.md"
-    load_strategy: "SELECTIVE_LOAD" # Only load if needed
+    load_strategy: "SELECTIVE_LOAD"
   epics:
     description: "Enhanced epics+stories file with BDD and source hints"
     whole: "{planning_artifacts}/*epic*.md"
     sharded: "{planning_artifacts}/*epic*/*.md"
-    load_strategy: "SELECTIVE_LOAD" # Only load needed epic
+    load_strategy: "SELECTIVE_LOAD"

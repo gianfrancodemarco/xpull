@@ -54,8 +54,9 @@ To validate that all required input documents exist and extract all requirements
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Extract requirements systematically from all documents
-- 💾 Populate {outputFile} with extracted requirements
+- 💾 Populate {outputFile} with extracted requirements (local working document)
 - 📖 Update frontmatter with extraction progress
+- 🐙 **NOTE:** The final output of this workflow is GitHub Issues — {outputFile} is a local working reference only
 - 🚫 FORBIDDEN to load next step until user selects 'C' and requirements are extracted
 
 ## REQUIREMENTS EXTRACTION PROCESS:

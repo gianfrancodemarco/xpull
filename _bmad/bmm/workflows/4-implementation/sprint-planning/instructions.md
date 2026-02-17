@@ -1,226 +1,112 @@
-# Sprint Planning - Sprint Status Generator
+# Sprint Planning - GitHub Milestone Manager
 
 <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
 <critical>You MUST have already loaded and processed: {project-root}/_bmad/bmm/workflows/4-implementation/sprint-planning/workflow.yaml</critical>
-
-## 📚 Document Discovery - Full Epic Loading
-
-**Strategy**: Sprint planning needs ALL epics and stories to build complete status tracking.
-
-**Epic Discovery Process:**
-
-1. **Search for whole document first** - Look for `epics.md`, `bmm-epics.md`, or any `*epic*.md` file
-2. **Check for sharded version** - If whole document not found, look for `epics/index.md`
-3. **If sharded version found**:
-   - Read `index.md` to understand the document structure
-   - Read ALL epic section files listed in the index (e.g., `epic-1.md`, `epic-2.md`, etc.)
-   - Process all epics and their stories from the combined content
-   - This ensures complete sprint status coverage
-4. **Priority**: If both whole and sharded versions exist, use the whole document
-
-**Fuzzy matching**: Be flexible with document names - users may use variations like `epics.md`, `bmm-epics.md`, `user-stories.md`, etc.
+<critical>🐙 ALL TRACKING IS ON GITHUB — epics are issues with label `epic`, stories are issues with label `story`</critical>
+<critical>⚠️ ABSOLUTELY NO TIME ESTIMATES. Do NOT mention hours, days, weeks, or timelines.</critical>
 
 <workflow>
 
-<step n="1" goal="Parse epic files and extract all work items">
+<step n="1" goal="Discover all epics and stories from GitHub">
 <action>Load {project_context} for project-wide patterns and conventions (if exists)</action>
 <action>Communicate in {communication_language} with {user_name}</action>
-<action>Look for all files matching `{epics_pattern}` in {epics_location}</action>
-<action>Could be a single `epics.md` file or multiple `epic-1.md`, `epic-2.md` files</action>
 
-<action>For each epic file found, extract:</action>
+<action>Fetch all issues from {github_owner}/{github_repo}:</action>
 
-- Epic numbers from headers like `## Epic 1:` or `## Epic 2:`
-- Story IDs and titles from patterns like `### Story 1.1: User Authentication`
-- Convert story format from `Epic.Story: Title` to kebab-case key: `epic-story-title`
+1. **Epic issues:** Search for issues with label `epic`, state: open
+2. **Story issues:** Search for issues with label `story`, state: open
 
-**Story ID Conversion Rules:**
+<action>For each epic issue, identify its sub-issues (stories)</action>
+<action>Build complete inventory:
+  - Epic → list of story issues (sub-issues)
+  - For each story, note its current status label: `backlog`, `ready-for-dev`, `in-progress`, `review`
+  - Closed story issues = `done`
+</action>
 
-- Original: `### Story 1.1: User Authentication`
-- Replace period with dash: `1-1`
-- Convert title to kebab-case: `user-authentication`
-- Final key: `1-1-user-authentication`
+<action>Present inventory to {user_name}:</action>
 
-<action>Build complete inventory of all epics and stories from all epic files</action>
+```
+## Current GitHub Issues Inventory
+
+### Epic 1: {title} (#{issue_number})
+- Story 1.1: {title} (#{number}) — {status_label}
+- Story 1.2: {title} (#{number}) — {status_label}
+...
+
+### Epic 2: {title} (#{issue_number})
+- Story 2.1: {title} (#{number}) — {status_label}
+...
+```
 </step>
 
-  <step n="0.5" goal="Discover and load project documents">
-    <invoke-protocol name="discover_inputs" />
-    <note>After discovery, these content variables are available: {epics_content} (all epics loaded - uses FULL_LOAD strategy)</note>
-  </step>
+<step n="2" goal="Create or select GitHub Milestone for sprint">
+<action>List existing milestones on {github_owner}/{github_repo}</action>
 
-<step n="2" goal="Build sprint status structure">
-<action>For each epic found, create entries in this order:</action>
+<check if="user wants to create a new milestone">
+  <ask>What should the sprint milestone be named? (e.g., "Sprint 1", "MVP Sprint")</ask>
+  <action>Create a new milestone on {github_owner}/{github_repo}:
+    - **Title:** {user_provided_name}
+    - **Description:** Sprint planning for {project_name}
+  </action>
+  <action>Store {{milestone_number}}</action>
+</check>
 
-1. **Epic entry** - Key: `epic-{num}`, Default status: `backlog`
-2. **Story entries** - Key: `{epic}-{story}-{title}`, Default status: `backlog`
-3. **Retrospective entry** - Key: `epic-{num}-retrospective`, Default status: `optional`
+<check if="user wants to use an existing milestone">
+  <action>Use the selected milestone</action>
+  <action>Store {{milestone_number}}</action>
+</check>
 
-**Example structure:**
-
-```yaml
-development_status:
-  epic-1: backlog
-  1-1-user-authentication: backlog
-  1-2-account-management: backlog
-  epic-1-retrospective: optional
-```
-
+<output>📌 Using milestone: {{milestone_title}} (#{milestone_number})</output>
 </step>
 
-<step n="3" goal="Apply intelligent status detection">
-<action>For each story, detect current status by checking files:</action>
+<step n="3" goal="Select stories for the sprint">
+<action>Present all unassigned story issues (not in any milestone) to {user_name}</action>
+<action>Group by epic for clarity</action>
 
-**Story file detection:**
+<ask>Which stories should be included in this sprint? You can:
+1. Select specific story issue numbers (e.g., #12, #15, #18)
+2. Select entire epics (e.g., "all of Epic 1")
+3. Select by status (e.g., "all backlog stories")
+4. Select all stories</ask>
 
-- Check: `{story_location_absolute}/{story-key}.md` (e.g., `stories/1-1-user-authentication.md`)
-- If exists → upgrade status to at least `ready-for-dev`
+<action>Based on user selection, collect the list of story issue numbers for the sprint</action>
+</step>
 
-**Preservation rule:**
+<step n="4" goal="Assign stories to milestone">
+<action>For each selected story issue:</action>
 
-- If existing `{status_file}` exists and has more advanced status, preserve it
-- Never downgrade status (e.g., don't change `done` to `ready-for-dev`)
+1. Assign it to milestone {{milestone_number}} on {github_owner}/{github_repo}
+2. Report: "Assigned #{issue_number} ({story_title}) to milestone {{milestone_title}}"
 
-**Status Flow Reference:**
-
-- Epic: `backlog` → `in-progress` → `done`
-- Story: `backlog` → `ready-for-dev` → `in-progress` → `review` → `done`
-- Retrospective: `optional` ↔ `done`
-  </step>
-
-<step n="4" goal="Generate sprint status file">
-<action>Create or update {status_file} with:</action>
-
-**File Structure:**
-
-```yaml
-# generated: {date}
-# project: {project_name}
-# project_key: {project_key}
-# tracking_system: {tracking_system}
-# story_location: {story_location}
-
-# STATUS DEFINITIONS:
-# ==================
-# Epic Status:
-#   - backlog: Epic not yet started
-#   - in-progress: Epic actively being worked on
-#   - done: All stories in epic completed
-#
-# Epic Status Transitions:
-#   - backlog → in-progress: Automatically when first story is created (via create-story)
-#   - in-progress → done: Manually when all stories reach 'done' status
-#
-# Story Status:
-#   - backlog: Story only exists in epic file
-#   - ready-for-dev: Story file created in stories folder
-#   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
-#   - done: Story completed
-#
-# Retrospective Status:
-#   - optional: Can be completed but not required
-#   - done: Retrospective has been completed
-#
-# WORKFLOW NOTES:
-# ===============
-# - Epic transitions to 'in-progress' automatically when first story is created
-# - Stories can be worked in parallel if team capacity allows
-# - SM typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
-
-generated: { date }
-project: { project_name }
-project_key: { project_key }
-tracking_system: { tracking_system }
-story_location: { story_location }
-
-development_status:
-  # All epics, stories, and retrospectives in order
-```
-
-<action>Write the complete sprint status YAML to {status_file}</action>
-<action>CRITICAL: Metadata appears TWICE - once as comments (#) for documentation, once as YAML key:value fields for parsing</action>
-<action>Ensure all items are ordered: epic, its stories, its retrospective, next epic...</action>
+<action>Count totals after assignment</action>
 </step>
 
 <step n="5" goal="Validate and report">
-<action>Perform validation checks:</action>
+<action>Perform validation:</action>
 
-- [ ] Every epic in epic files appears in {status_file}
-- [ ] Every story in epic files appears in {status_file}
-- [ ] Every epic has a corresponding retrospective entry
-- [ ] No items in {status_file} that don't exist in epic files
-- [ ] All status values are legal (match state machine definitions)
-- [ ] File is valid YAML syntax
+- [ ] All selected stories are assigned to the milestone
+- [ ] No duplicate assignments
+- [ ] Milestone is accessible and visible
 
-<action>Count totals:</action>
+<action>Display completion summary:</action>
 
-- Total epics: {{epic_count}}
-- Total stories: {{story_count}}
-- Epics in-progress: {{in_progress_count}}
-- Stories done: {{done_count}}
+```
+## 📋 Sprint Planning Complete
 
-<action>Display completion summary to {user_name} in {communication_language}:</action>
-
-**Sprint Status Generated Successfully**
-
-- **File Location:** {status_file}
-- **Total Epics:** {{epic_count}}
-- **Total Stories:** {{story_count}}
-- **Epics In Progress:** {{epics_in_progress_count}}
-- **Stories Completed:** {{done_count}}
+- **Milestone:** {{milestone_title}}
+- **Stories assigned:** {{story_count}}
+- **Status breakdown:**
+  - backlog: {{count_backlog}}
+  - ready-for-dev: {{count_ready}}
+  - in-progress: {{count_in_progress}}
+  - review: {{count_review}}
+  - done: {{count_done}}
 
 **Next Steps:**
-
-1. Review the generated {status_file}
-2. Use this file to track development progress
-3. Agents will update statuses as they work
-4. Re-run this workflow to refresh auto-detected statuses
-
+1. Run `create-story` to enrich backlog stories with dev context
+2. Run `dev-story` to start implementing ready-for-dev stories
+3. Run `sprint-status` to check progress at any time
+```
 </step>
 
 </workflow>
-
-## Additional Documentation
-
-### Status State Machine
-
-**Epic Status Flow:**
-
-```
-backlog → in-progress → done
-```
-
-- **backlog**: Epic not yet started
-- **in-progress**: Epic actively being worked on (stories being created/implemented)
-- **done**: All stories in epic completed
-
-**Story Status Flow:**
-
-```
-backlog → ready-for-dev → in-progress → review → done
-```
-
-- **backlog**: Story only exists in epic file
-- **ready-for-dev**: Story file created (e.g., `stories/1-3-plant-naming.md`)
-- **in-progress**: Developer actively working
-- **review**: Ready for code review (via Dev's code-review workflow)
-- **done**: Completed
-
-**Retrospective Status:**
-
-```
-optional ↔ done
-```
-
-- **optional**: Ready to be conducted but not required
-- **done**: Finished
-
-### Guidelines
-
-1. **Epic Activation**: Mark epic as `in-progress` when starting work on its first story
-2. **Sequential Default**: Stories are typically worked in order, but parallel work is supported
-3. **Parallel Work Supported**: Multiple stories can be `in-progress` if team capacity allows
-4. **Review Before Done**: Stories should pass through `review` before `done`
-5. **Learning Transfer**: SM typically creates next story after previous one is `done` to incorporate learnings

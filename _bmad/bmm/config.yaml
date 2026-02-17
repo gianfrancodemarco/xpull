@@ -9,6 +9,19 @@ planning_artifacts: "{project-root}/_bmad-output/planning-artifacts"
 implementation_artifacts: "{project-root}/_bmad-output/implementation-artifacts"
 project_knowledge: "{project-root}/docs"
 
+# GitHub Configuration
+github_owner: gianfrancodemarco
+github_repo: xpull
+
+# GitHub Labels (auto-created by workflows if missing)
+github_labels:
+  epic: "epic"
+  story: "story"
+  status_backlog: "backlog"
+  status_ready_for_dev: "ready-for-dev"
+  status_in_progress: "in-progress"
+  status_review: "review"
+
 # Core Configuration Values
 user_name: Gianfranco
 communication_language: English

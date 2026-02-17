@@ -1,6 +1,6 @@
 ---
 name: 'step-02-design-epics'
-description: 'Design and approve the epics_list that will organize all requirements into user-value-focused epics'
+description: 'Design and approve the epics_list, then create GitHub issues for each epic'
 
 # Path Definitions
 workflow_path: '{project-root}/_bmad/bmm/workflows/3-solutioning/create-epics-and-stories'
@@ -10,6 +10,13 @@ thisStepFile: './step-02-design-epics.md'
 nextStepFile: './step-03-create-stories.md'
 workflowFile: '{workflow_path}/workflow.md'
 outputFile: '{planning_artifacts}/epics.md'
+
+# GitHub Configuration (from config.yaml)
+github_owner: '{config_source}:github_owner'
+github_repo: '{config_source}:github_repo'
+
+# Issue Template Reference
+epicTemplate: '{project-root}/.github/ISSUE_TEMPLATE/epic.md'
 
 # Task References
 advancedElicitationTask: '{project-root}/_bmad/core/workflows/advanced-elicitation/workflow.xml'
@@ -23,7 +30,7 @@ epicsTemplate: '{workflow_path}/templates/epics-template.md'
 
 ## STEP GOAL:
 
-To design and get approval for the epics_list that will organize all requirements into user-value-focused epics.
+To design and get approval for the epics_list, then create GitHub issues for each approved epic on `{github_owner}/{github_repo}`.
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -54,9 +61,9 @@ To design and get approval for the epics_list that will organize all requirement
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Design epics collaboratively based on extracted requirements
-- 💾 Update {{epics_list}} in {outputFile}
 - 📖 Document the FR coverage mapping
 - 🚫 FORBIDDEN to load next step until user approves epics_list
+- 🐙 **PRIMARY OUTPUT: GitHub Issues** — each approved epic becomes a GitHub Issue on `{github_owner}/{github_repo}`
 
 ## EPIC DESIGN PROCESS:
 
@@ -180,15 +187,55 @@ If user wants changes:
 - Re-present for approval
 - Repeat until approval is received
 
-## CONTENT TO UPDATE IN DOCUMENT:
+### 8. Create GitHub Issues for Epics
 
-After approval, update {outputFile}:
+**CRITICAL: After approval, create GitHub issues for each epic. This is the PRIMARY OUTPUT of this step.**
 
-1. Replace {{epics_list}} placeholder with the approved epic list
-2. Replace {{requirements_coverage_map}} with the coverage map
-3. Ensure all FRs are mapped to epics
+Using GitHub tools (MCP or `gh` CLI) on repo `{github_owner}/{github_repo}`:
 
-### 8. Present MENU OPTIONS
+**A. Ensure required labels exist** (create if missing):
+
+| Label | Color | Description |
+|-------|-------|-------------|
+| `epic` | `#6B3FA0` | Epic-level issue |
+| `story` | `#1D76DB` | Story-level issue |
+| `backlog` | `#E4E669` | Status: Backlog |
+| `ready-for-dev` | `#0E8A16` | Status: Ready for development |
+| `in-progress` | `#FBCA04` | Status: In progress |
+| `review` | `#D93F0B` | Status: In review |
+
+**B. Create one GitHub Issue per epic:**
+
+- **Title:** `Epic {N}: {epic_title}`
+- **Body:** Follow the epic issue template at `{epicTemplate}`:
+  ```
+  ## Goal
+  {epic_goal_statement}
+
+  ## Functional Requirements Covered
+  {FR_list_for_this_epic}
+
+  ## Stories
+  Stories will be added as sub-issues in the next step.
+  ```
+- **Labels:** `epic`
+
+**C. Record epic-to-issue mapping:**
+
+Store in context for step-03: `Epic {N} → GitHub Issue #{issue_number} (ID: {issue_id})`
+
+The issue ID (not number) is needed for the sub-issue API.
+
+**D. Report to user:**
+
+For each epic: "Created GitHub Issue #{number} for Epic {N}: {title}"
+Show total issues created.
+
+### 9. Save Local Reference (optional)
+
+Also update {outputFile} with the approved epic list and requirements coverage map as a local planning reference. Include GitHub issue numbers in the document for cross-reference.
+
+### 10. Present MENU OPTIONS
 
 Display: "**Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Continue"
 
@@ -196,8 +243,8 @@ Display: "**Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Cont
 
 - IF A: Read fully and follow: {advancedElicitationTask}
 - IF P: Read fully and follow: {partyModeWorkflow}
-- IF C: Save approved epics_list to {outputFile}, update frontmatter, then read fully and follow: {nextStepFile}
-- IF Any other comments or queries: help user respond then [Redisplay Menu Options](#8-present-menu-options)
+- IF C: Update frontmatter, then read fully and follow: {nextStepFile}
+- IF Any other comments or queries: help user respond then [Redisplay Menu Options](#10-present-menu-options)
 
 #### EXECUTION RULES:
 
@@ -208,7 +255,7 @@ Display: "**Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Cont
 
 ## CRITICAL STEP COMPLETION NOTE
 
-ONLY WHEN C is selected and the approved epics_list is saved to document, will you then read fully and follow: {nextStepFile} to begin story creation step.
+ONLY WHEN C is selected and GitHub issues are created for all approved epics, will you then read fully and follow: {nextStepFile} to begin story creation step.
 
 ---
 
@@ -221,13 +268,15 @@ ONLY WHEN C is selected and the approved epics_list is saved to document, will y
 - epics_list created and formatted correctly
 - Requirements coverage map completed
 - User gives explicit approval for epic structure
-- Document updated with approved epics
+- **GitHub Issues created for ALL approved epics with `epic` label**
+- **Epic-to-issue mapping recorded for step-03**
 
 ### ❌ SYSTEM FAILURE:
 
 - Epics organized by technical layers
 - Missing FRs in coverage map
 - No user approval obtained
-- epics_list not saved to document
+- **GitHub Issues NOT created**
+- **Missing epic-to-issue mapping**
 
 **Master Rule:** Skipping steps, optimizing sequences, or not following exact instructions is FORBIDDEN and constitutes SYSTEM FAILURE.

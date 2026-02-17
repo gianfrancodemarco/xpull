@@ -1,11 +1,10 @@
 ---
-stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics', 'step-03-create-stories', 'step-04-final-validation']
-workflowComplete: true
-completedAt: '2026-02-17'
+stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics']
 inputDocuments:
   - '_bmad-output/planning-artifacts/prd.md'
   - '_bmad-output/planning-artifacts/architecture.md'
   - '_bmad-output/planning-artifacts/ux-design-specification.md'
+  - '_bmad-output/planning-artifacts/prd-validation-report.md'
 ---
 
 # xpull - Epic Breakdown
@@ -110,964 +109,141 @@ NFR38: GitHub API outages (5xx) handled without crash; work queued for retry
 
 ### Additional Requirements
 
-**From Architecture — Starter Template & Infrastructure:**
-- Project initialized with Create T3 App (Next.js App Router + TypeScript + Prisma + NextAuth)
-- Post-init: MUI + Emotion, Vitest + Testing Library, Playwright added
-- Docker Compose required for local orchestration (app + Postgres + supporting services)
-- Split web/api/worker services from day one (separate Dockerfiles)
-- GitHub Actions CI on PR: build, test, lint (no auto-deploy)
-- Environment management via .env only for MVP
-- Hosting provider deferred (provider-agnostic structure)
+**From Architecture:**
+- Starter template: Create T3 App (`pnpm dlx create-t3-app@latest xpull --CI --appRouter --prisma --nextAuth --dbProvider postgres --tailwind false`) — impacts Epic 1, Story 1
+- Post-init setup: MUI (`@mui/material`, `@emotion/react`, `@emotion/styled`, `@mui/material-nextjs`, `@emotion/cache`), Vitest, Playwright
+- Database: PostgreSQL 18.x with Prisma 7.x ORM + Prisma Migrate
+- Validation: Zod 4.x at API boundaries + DB constraints
+- Authentication: GitHub OAuth via next-auth/Auth.js with JWT-only stateless sessions
+- Authorization: RBAC-lite (user, admin) with resource ownership checks
+- API pattern: REST-first internal API with standardized typed error envelope (data/error + meta with requestId/timestamp)
+- Frontend state: Redux Toolkit from day one, feature-folder organization
+- UI framework: MUI token-driven design system (no Tailwind)
+- Infrastructure: Docker Compose required for local orchestration; split web/api/worker services immediately
+- CI/CD: GitHub Actions on PR for build/test/lint (no auto-deploy)
+- Testing: Vitest (unit) + Playwright (E2E), co-located unit tests
+- Event system: domain.entity.action.v1 naming, idempotent consumers, eventId deduplication
+- Code conventions: PascalCase components, useCamelCase hooks, camelCase functions/variables, SCREAMING_SNAKE_CASE constants
+- DB naming: snake_case tables (plural), snake_case columns, idx_/uq_ prefixes for indexes/constraints
+- API naming: plural resources, camelCase query params, x-xpull- custom header prefix
+- Project structure: features/, shared/, server/, worker/ organization with strict boundaries
+- Error handling: domain error codes, correlation IDs, friendly UI messages
+- Environment: .env only for MVP
 
-**From Architecture — Data & API:**
-- PostgreSQL 18.x as database
-- Prisma 7.x + Prisma Migrate as schema/migration system of record
-- Zod 4.x request/response boundary validation plus relational DB constraints
-- REST-first internal API with standardized typed error envelopes (data/meta/error structure)
-- JSON fields camelCase; dates ISO 8601 UTC; nullability explicit
-- Correlation IDs on all API requests and logs
-- No distributed cache (Redis) in MVP
-
-**From Architecture — Auth & Security:**
-- GitHub OAuth via next-auth/Auth.js
-- RBAC-lite (user, admin) with resource ownership checks
-- JWT-only stateless sessions
-- Minimal API security guards now; hardening deferred post-MVP
-- Security hardening debt explicitly tracked (rate limiting depth, session rotation, abuse protections)
-
-**From Architecture — Frontend:**
-- Redux Toolkit from day one for shared client state
-- MUI token-driven design system with feature-folder organization
-- Mostly client rendering (explicit SSR/SSG carve-out needed for public profiles)
-- Feature-domain project structure: features/auth, features/profile, features/progression, features/unboxing, features/imports
-- Shared primitives under shared/ui, shared/lib, shared/types
-
-**From Architecture — Implementation Patterns:**
-- Database naming: snake_case tables/columns; indexes idx_<table>_<columns>
-- API paths: plural resources, nested patterns (/users/{userId}/badges)
-- Code naming: PascalCase components, camelCase functions, SCREAMING_SNAKE constants
-- Event system: domain.entity.action.v1 naming; consumers must be idempotent
-- Unit tests co-located (*.test.ts); E2E centralized in tests/e2e/
-- Loading states: skeletons for content, spinners for short actions; explicit empty/loading/error states
-
-**From Architecture — Known Gaps to Track:**
-- SEO vs rendering strategy tension (public profiles need SSR/SSG, rest is SPA)
-- Security hardening debt (JWT rotation, rate limiting, abuse protection)
-- Hosting provider selection deferred
-
-**From UX — Visual Design Foundation:**
-- Dark-first "Neo Arcade" palette: Primary Electric Violet #7C4DFF, Secondary Cyan Glow #00D1FF, Accent Gold #FFC857, Background Deep Navy #0B1020
-- Typography: Sora (headings), Inter (body/UI), JetBrains Mono (code/meta)
-- 8px base spacing unit; radius scale 8/12/16/20px
+**From UX Design:**
+- Dark-first "Neo Arcade" color palette (Electric Violet #7C4DFF primary, Cyan Glow #00D1FF secondary, Gold #FFC857 accent, Deep Navy #0B1020 background)
+- Typography: Sora (headings/display), Inter (body/UI), JetBrains Mono (code/meta)
+- Spacing: 8px base unit, 4px micro-adjustment, radius scale 8/12/16/20px
 - Grid: 12-col desktop, 8-col tablet, 4-col mobile
+- Design direction: Direction 2 (Story Feed) base + Direction 3 (RPG Chamber) identity elements
+- Custom components required: IdentityHero, StoryMilestoneCard, WhatChangedPanel, SkillGalaxyView, NextActionModule, UnboxingCascadeController, SparseRecoveryPanel
+- Responsive: mobile-first CSS, breakpoints 320-767 (mobile), 768-1023 (tablet), 1024+ (desktop)
+- Minimum touch target: 44x44 on mobile
+- WCAG 2.1 AA compliance baseline
+- prefers-reduced-motion support for all animations
+- Color never sole status indicator (color + icon + text)
+- Focus indicators with >=3:1 contrast ratio
+- Skeleton loading for content surfaces, spinners for short actions
+- Single primary CTA per major surface
+- Progression-first hierarchy: key progression signals above secondary detail
 
-**From UX — Design Direction:**
-- Direction 2 (Story Feed) as base + Direction 3 (RPG Chamber) signature elements
-- Narrative-first progression feed with milestone storytelling cards
-- Avatar + Level Crest + League Ring identity anchor
-- Skill Galaxy View as primary skill visualization
-
-**From UX — Custom Components Required:**
-- IdentityHero: persistent identity anchor (Avatar + Level Crest + League Ring)
-- StoryMilestoneCard: progression event narrative cards
-- WhatChangedPanel: "since last visit" snapshot for return sessions
-- SkillGalaxyView: interactive skill tree visualization with keyboard-navigable alternative
-- NextActionModule: single clear growth action suggestion
-- UnboxingCascadeController: cinematic onboarding sequence with skip/pause/fast-forward
-- SparseRecoveryPanel: playful low-data encouragement with constructive next steps
-
-**From UX — Responsive & Accessibility:**
-- Mobile-first CSS strategy with progressive enhancement
-- Breakpoints: Mobile 320-767px, Tablet 768-1023px, Desktop 1024px+, Large desktop 1440px+
-- Functional parity across devices (layout adaptation, not feature removal)
-- WCAG 2.1 AA compliance target
-- Reduced-motion alternatives for all animations
-- 44x44 minimum touch targets on mobile
-- Keyboard operability for all critical interactions
-- Screen reader support with ARIA labels for dynamic progression visuals
+**From PRD Validation Report:**
+- FR14, FR15 need explicit badge/title criteria and thresholds for deterministic award logic
+- FR18 needs explicitly listed scoring principles and verification points
+- FR24 needs measurable "active developer" and "reachable next node" thresholds (addressed in updated PRD)
+- FR47 needs numeric alert thresholds (addressed in updated PRD: 5% error rate for 5 consecutive minutes)
+- Orphan FRs (FR41, FR43) need explicit journey traceability
+- Some NFRs need clearer measurement methods (addressed in updated PRD)
 
 ### FR Coverage Map
 
-FR1: Epic 1 - GitHub OAuth authentication
-FR2: Epic 1 - GitHub account/repo selection
-FR3: Epic 2 - Historical Git data import
-FR4: Epic 2 - Process up to 50,000 commits
-FR5: Epic 2 - Continuous webhook sync
-FR6: Epic 2 - Language detection and attribution
-FR7: Epic 2 - GitHub API rate limit handling
-FR8: Epic 7 - Disconnect GitHub and delete data
-FR9: Epic 2 - Webhook failure retry and dedup
-FR10: Epic 3 - XP calculation (heuristic algorithm)
-FR11: Epic 3 - Level determination (XP curve)
-FR12: Epic 3 - League assignment (Bronze-Diamond)
-FR13: Epic 3 - View XP, level, league status
-FR14: Epic 3 - Badge awarding on criteria
-FR15: Epic 3 - Title awarding on thresholds
-FR16: Epic 3 - Badge showcase selection (up to 6)
-FR17: Epic 3 - Deterministic XP/level outputs
-FR18: Epic 3 - Private XP weights, public principles
-FR19: Epic 4 - Language skill tree generation
-FR20: Epic 4 - Skill tree node unlocking
-FR21: Epic 4 - Display locked/unlocked nodes
-FR22: Epic 4 - Interactive skill tree (pan/zoom/select)
-FR23: Epic 4 - Node detail view
-FR24: Epic 4 - Growth path guarantee (reachable next node)
-FR25: Epic 5 - Cascading level-unlock Unboxing sequence
-FR26: Epic 5 - Progressive UI feature reveal
-FR27: Epic 5 - Cascade animations for badges/titles/nodes
-FR28: Epic 5 - Skip/fast-forward Unboxing
-FR29: Epic 5 - Sparse data encouragement messaging
-FR30: Epic 5 - "Connect more sources" placeholder
-FR31: Epic 5 - Reduced-motion alternative
-FR32: Epic 6 - View own profile
-FR33: Epic 6 - Public profile URL (xpull.dev/{username})
-FR34: Epic 6 - Profile customization (bio, links)
-FR35: Epic 6 - Display username selection
-FR36: Epic 6 - Open Graph meta tags
-FR37: Epic 6 - Dynamic OG images
-FR38: Epic 6 - SEO crawlability and social preview metadata
-FR39: Epic 7 - Private repo name protection
-FR40: Epic 7 - Store only derived metrics (no raw code)
-FR41: Epic 7 - View collected data
-FR42: Epic 7 - Account and data deletion
-FR43: Epic 7 - Profile visibility control (public/private)
-FR44: Epic 8 - Sync pipeline health dashboard
-FR45: Epic 8 - Aggregate platform metrics
-FR46: Epic 8 - Individual sync failure investigation
-FR47: Epic 8 - Error rate alerting (>5% for 5 min)
-FR48: Epic 8 - 1,000 user capacity support
+FR1: Epic 1 (#3) - GitHub OAuth authentication
+FR2: Epic 1 (#3) - Repository selection
+FR3: Epic 2 (#4) - Historical Git data import
+FR4: Epic 2 (#4) - Import up to 50,000 commits
+FR5: Epic 2 (#4) - Continuous webhook sync
+FR6: Epic 2 (#4) - Language detection and attribution
+FR7: Epic 2 (#4) - GitHub API rate limit handling
+FR8: Epic 1 (#3) - Disconnect GitHub and delete data
+FR9: Epic 2 (#4) - Webhook failure retry and deduplication
+FR10: Epic 3 (#5) - XP calculation engine
+FR11: Epic 3 (#5) - Level determination
+FR12: Epic 3 (#5) - League assignment
+FR13: Epic 3 (#5) - View XP, level, league status
+FR14: Epic 3 (#5) - Badge awarding
+FR15: Epic 3 (#5) - Title awarding
+FR16: Epic 3 (#5) - Badge showcase selection
+FR17: Epic 3 (#5) - Deterministic XP/level outputs
+FR18: Epic 3 (#5) - Private XP weights with public principles
+FR19: Epic 4 (#6) - Language skill tree generation
+FR20: Epic 4 (#6) - Skill tree node unlock logic
+FR21: Epic 4 (#6) - Locked/unlocked node display
+FR22: Epic 4 (#6) - Interactive skill tree visualization
+FR23: Epic 4 (#6) - Node detail inspection
+FR24: Epic 4 (#6) - Reachable next node guarantee
+FR25: Epic 5 (#7) - Cascading level-unlock sequence
+FR26: Epic 5 (#7) - Progressive UI reveal during Unboxing
+FR27: Epic 5 (#7) - Cascade animations for badges/titles/nodes
+FR28: Epic 5 (#7) - Skip/fast-forward Unboxing
+FR29: Epic 5 (#7) - Sparse data encouragement messaging
+FR30: Epic 5 (#7) - Connect more sources placeholder
+FR31: Epic 5 (#7) - Reduced-motion alternative
+FR32: Epic 6 (#8) - View profile
+FR33: Epic 6 (#8) - Public profile shareable URL
+FR34: Epic 6 (#8) - Profile customization (bio, links)
+FR35: Epic 6 (#8) - Display username
+FR36: Epic 6 (#8) - Open Graph meta tags
+FR37: Epic 6 (#8) - Dynamic OG images
+FR38: Epic 6 (#8) - SEO crawlability
+FR39: Epic 2 (#4) - Private repo names never on public profiles
+FR40: Epic 2 (#4) - Store only derived metrics
+FR41: Epic 6 (#8) - View collected data
+FR42: Epic 6 (#8) - Delete account and data
+FR43: Epic 6 (#8) - Profile visibility controls
+FR44: Epic 7 (#9) - Git sync pipeline health
+FR45: Epic 7 (#9) - Aggregate platform metrics
+FR46: Epic 7 (#9) - Individual sync failure investigation
+FR47: Epic 7 (#9) - Automated error rate alerting
+FR48: Epic 7 (#9) - Support 1,000 users
 
 ## Epic List
 
-### Epic 1: Project Scaffolding & GitHub Authentication
-Users can sign up and sign in to xpull via GitHub OAuth, with the foundational platform running.
-**FRs covered:** FR1, FR2
+### Epic 1: Project Foundation & Developer Authentication (GitHub Issue #3)
+Users can sign up with GitHub OAuth, access the platform, and manage their connection. Scaffolds project foundation (T3 App, Docker Compose, PostgreSQL, CI, auth, error envelope, project structure).
+**FRs covered:** FR1, FR2, FR8
 
-### Epic 2: Git Data Import & Sync Pipeline
-Users' complete Git history is imported upon connection and kept automatically up to date through ongoing sync.
-**FRs covered:** FR3, FR4, FR5, FR6, FR7, FR9
+### Epic 2: Git Data Ingestion Pipeline (GitHub Issue #4)
+Users have their real-world coding activity automatically imported and kept in sync, with privacy-safe data handling.
+**FRs covered:** FR3, FR4, FR5, FR6, FR7, FR9, FR39, FR40
 
-### Epic 3: Developer Progression Engine
-Users can see their XP, level, league, earned badges and titles — the core gamification identity emerges from their Git data.
+### Epic 3: Developer Progression Engine (GitHub Issue #5)
+Users can see their XP, level, league, badges, and titles calculated deterministically from their real Git activity.
 **FRs covered:** FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR18
 
-### Epic 4: Skill Tree System
-Users can explore interactive language skill trees that visualize their growth path with unlocked and locked nodes.
+### Epic 4: Skill Tree System (GitHub Issue #6)
+Users can explore interactive language skill trees that visualize their coding growth across languages.
 **FRs covered:** FR19, FR20, FR21, FR22, FR23, FR24
 
-### Epic 5: The Unboxing Experience
-New users experience xpull's signature cinematic onboarding — a cascading reveal of their developer journey.
+### Epic 5: The Unboxing Experience (GitHub Issue #7)
+New users experience a memorable, cinematic reveal of their developer journey through cascading level, badge, and skill tree unlocks.
 **FRs covered:** FR25, FR26, FR27, FR28, FR29, FR30, FR31
 
-### Epic 6: Developer Profile & Social Sharing
-Users have a public, shareable developer profile with customization, OG images, and SEO crawlability.
-**FRs covered:** FR32, FR33, FR34, FR35, FR36, FR37, FR38
+### Epic 6: Developer Profile & Social Sharing (GitHub Issue #8)
+Users have a shareable public profile showcasing their developer identity, with full control over visibility, customization, and data transparency.
+**FRs covered:** FR32, FR33, FR34, FR35, FR36, FR37, FR38, FR41, FR42, FR43
 
-### Epic 7: Data Privacy & Account Management
-Users can control their data, manage privacy settings, and fully delete their account — building trust through transparency.
-**FRs covered:** FR8, FR39, FR40, FR41, FR42, FR43
-
-### Epic 8: Platform Operations & Monitoring
-The platform operator can monitor sync health, investigate failures, view aggregate metrics, and receive alerts.
+### Epic 7: Platform Operations & Observability (GitHub Issue #9)
+Operators can monitor platform health, investigate failures, and receive alerts when issues arise.
 **FRs covered:** FR44, FR45, FR46, FR47, FR48
 
----
-
-## Epic 1: Project Scaffolding & GitHub Authentication
-
-Users can sign up and sign in to xpull via GitHub OAuth, with the foundational platform running.
-
-### Story 1.1: Project Initialization & Local Development Environment
-
-As a developer,
-I want the xpull project scaffolded with all foundational tooling and a working local development environment,
-So that I have a reliable, consistent baseline to build every future feature on.
-
-**Acceptance Criteria:**
-
-**Given** no project exists yet
-**When** the initialization commands are run (Create T3 App with App Router, Prisma, NextAuth, PostgreSQL; plus MUI/Emotion, Vitest/Testing Library, Playwright)
-**Then** a working Next.js TypeScript application is created with all dependencies installed
-**And** `docker-compose.yml` exists at repo root with services for the app and PostgreSQL
-**And** running `docker compose up` starts the app and database successfully
-**And** Prisma connects to the Dockerized PostgreSQL and migrations can be run
-**And** the MUI theme is configured with the Neo Arcade dark palette (Deep Navy background #0B1020, Electric Violet primary #7C4DFF, Cyan Glow secondary #00D1FF, Gold accent #FFC857)
-**And** typography tokens are set (Sora headings, Inter body, JetBrains Mono code)
-**And** spacing uses 8px base unit
-**And** the project structure follows the Architecture doc: `src/app/`, `src/features/`, `src/shared/`, `src/server/`, `src/worker/`, `tests/`
-**And** `shared/lib/api-response.ts` defines the standard success/error envelope shapes
-**And** `shared/lib/errors.ts` defines the base domain error types
-**And** `server/config/env.ts` validates environment variables with Zod
-**And** `.env.example` documents all required environment variables
-**And** a Vitest config exists and a sample unit test passes
-**And** a Playwright config exists and can launch a browser
-**And** `.github/workflows/ci.yml` runs lint, typecheck, and unit tests on PR
-**And** ESLint is configured and passes on the initial codebase
-
-### Story 1.2: GitHub OAuth Sign-In
-
-As a user,
-I want to sign in to xpull with my GitHub account,
-So that I can access the platform using my developer identity without creating a separate password.
-
-**Acceptance Criteria:**
-
-**Given** an unauthenticated user visits xpull
-**When** they click "Sign in with GitHub"
-**Then** they are redirected to GitHub's OAuth authorization page with minimum required scopes
-**And** upon granting permission, they are redirected back to xpull and a session is created
-
-**Given** a user completes GitHub OAuth successfully
-**When** the callback is processed
-**Then** a user record is created in the database (if new) or matched (if returning) using their GitHub ID
-**And** the GitHub OAuth token is stored encrypted in the database and never exposed to the client
-**And** a JWT session token is issued and stored in an httpOnly secure cookie
-**And** the user is redirected to the authenticated dashboard route
-
-**Given** a user has an active session
-**When** they visit any authenticated page
-**Then** the session is validated and user context is available
-**And** the session expires after 30 minutes of inactivity
-
-**Given** a user clicks "Sign out"
-**When** the logout action completes
-**Then** the session token is invalidated within 5 seconds
-**And** the user is redirected to the public landing page
-
-**Given** a user denies the OAuth permission or an error occurs
-**When** the OAuth callback receives an error
-**Then** the user sees a clear error message with a retry option
-**And** no partial user record is created
-
-**Given** authenticated and unauthenticated routes exist
-**When** an unauthenticated user attempts to access a protected route
-**Then** they are redirected to the sign-in page
-**And** public routes (landing page) remain accessible without authentication
-
-### Story 1.3: GitHub Account & Repository Selection
-
-As a user,
-I want to select which GitHub accounts and repositories xpull can access,
-So that I control exactly what data the platform uses for my developer profile.
-
-**Acceptance Criteria:**
-
-**Given** a user has signed in via GitHub OAuth
-**When** they navigate to the settings or onboarding repository selection page
-**Then** they see a list of their GitHub accounts (personal + any organizations they have access to)
-**And** for each account, they see available repositories grouped by account
-
-**Given** the repository list is displayed
-**When** the user selects or deselects specific repositories
-**Then** the selections are persisted to the database and associated with the user record
-**And** only selected repositories will be used for data import and sync
-
-**Given** a user has previously selected repositories
-**When** they return to the repository selection page
-**Then** their prior selections are reflected in the UI
-
-**Given** a user changes their repository selection after initial setup
-**When** they save the updated selection
-**Then** newly added repositories become eligible for import
-**And** removed repositories stop syncing (existing derived data is retained until explicit deletion)
-
-**Given** the GitHub API is slow or rate-limited during repository listing
-**When** the user opens the selection page
-**Then** a loading state is shown with a skeleton placeholder
-**And** if the request fails, a clear error message with retry is displayed
-
----
-
-## Epic 2: Git Data Import & Sync Pipeline
-
-Users' complete Git history is imported upon connection and kept automatically up to date through ongoing sync.
-
-### Story 2.1: Historical Git Data Import
-
-As a user,
-I want my complete Git history imported when I connect my GitHub account,
-So that xpull can analyze all my past contributions and build my developer profile from day one.
-
-**Acceptance Criteria:**
-
-**Given** a user has connected GitHub and selected repositories
-**When** the import is triggered (automatically after repo selection or manually)
-**Then** a background worker job is enqueued for the user's selected repositories
-**And** the job fetches commits, pull requests, and code reviews from the GitHub API
-**And** raw events are normalized into internal domain events and persisted to the database
-**And** each persisted event includes: user ID, repo reference (no private repo names in public surfaces), event type, timestamp, and metadata
-**And** the import creates only the database tables/entities it needs (git_events, imports, repos)
-
-**Given** a repository with up to 50,000 commits
-**When** the historical import processes it
-**Then** all commits are imported without failure
-**And** processing throughput is >=1,000 commits/minute
-
-**Given** an import is in progress
-**When** the user checks their dashboard
-**Then** they see the import status (queued, in progress with percentage, completed, or failed)
-
-**Given** an import fails partway through
-**When** the failure is detected
-**Then** the import is retried up to 3 times automatically
-**And** already-processed events are not duplicated (idempotent by event ID)
-**And** if all retries fail, the import is flagged for operator review
-
-**Given** multiple users trigger imports simultaneously
-**When** the import queue has up to 200 concurrent jobs
-**Then** all jobs are processed without data loss
-**And** import processing does not degrade interactive API response times
-
-### Story 2.2: Language Detection & Attribution
-
-As a user,
-I want xpull to detect which programming languages I use and attribute my activity to each language,
-So that my skill profile accurately reflects the technologies I work with.
-
-**Acceptance Criteria:**
-
-**Given** Git events have been imported or synced
-**When** the language detection process runs
-**Then** each event is analyzed to determine the programming language(s) involved
-**And** language attribution is stored per event in the database
-
-**Given** a commit touches multiple languages (e.g., TypeScript and Python files)
-**When** the attribution is calculated
-**Then** the commit is attributed proportionally or to all relevant languages
-
-**Given** a language cannot be determined (e.g., configuration files, binary data)
-**When** detection runs
-**Then** those events are categorized appropriately (e.g., "Other" or excluded from language-specific attribution)
-**And** no error is raised for unrecognizable file types
-
-**Given** the GitHub API provides language metadata for repositories
-**When** that metadata is available
-**Then** it is used to supplement file-level detection for improved accuracy
-
-### Story 2.3: Ongoing Git Sync via Webhooks
-
-As a user,
-I want my new Git activity to sync automatically after initial import,
-So that my profile stays up to date without any manual action.
-
-**Acceptance Criteria:**
-
-**Given** a user has completed initial import for selected repositories
-**When** the import completes
-**Then** GitHub webhooks are registered for push events, pull request events, and review events on selected repositories
-
-**Given** a webhook event arrives from GitHub
-**When** the event is received by the webhook endpoint
-**Then** it is validated (signature verification) and enqueued for processing
-**And** the worker normalizes it into the same internal event format used by historical import
-**And** language detection runs on the new event
-
-**Given** webhook events arrive out of order
-**When** they are processed
-**Then** the system handles them correctly based on event timestamps, not arrival order
-
-**Given** a duplicate webhook event arrives (same delivery ID)
-**When** it is received
-**Then** it is deduplicated and not processed twice
-
-**Given** a webhook delivery fails (GitHub retries)
-**When** the retry arrives
-**Then** it is processed successfully without creating duplicate events
-
-**Given** the webhook endpoint is temporarily unavailable
-**When** GitHub retries delivery
-**Then** events are processed upon recovery with no data loss
-
-### Story 2.4: GitHub API Rate Limit & Error Resilience
-
-As a user,
-I want the system to handle GitHub API limitations gracefully,
-So that my data import and sync never loses data even when GitHub is slow or unavailable.
-
-**Acceptance Criteria:**
-
-**Given** the GitHub API returns HTTP 429 (rate limit exceeded)
-**When** the import or sync worker encounters it
-**Then** the worker pauses and retries with exponential backoff
-**And** the retry-after header is respected if present
-**And** no data is lost and no partial state is left inconsistent
-
-**Given** the GitHub API returns 5xx server errors
-**When** the worker encounters them
-**Then** the work item is requeued for retry with exponential backoff
-**And** the system does not crash
-**And** up to 3 retries are attempted before flagging for operator review
-
-**Given** the authenticated user's rate limit (5,000 requests/hour) is approaching exhaustion
-**When** the remaining quota drops below a threshold
-**Then** API calls are batched and queued to stay within limits
-**And** import progress is paused rather than failed
-
-**Given** GitHub API calls are made throughout the codebase (import, sync, repo listing)
-**When** any module needs to call GitHub
-**Then** all calls go through an internal GitHub API abstraction layer
-**And** the abstraction handles auth headers, rate limit tracking, error classification, and retry logic
-**And** this abstraction enables future GitHub API version changes without modifying consumers
-
----
-
-## Epic 3: Developer Progression Engine
-
-Users can see their XP, level, league, earned badges and titles — the core gamification identity emerges from their Git data.
-
-### Story 3.1: XP Calculation Engine
-
-As a user,
-I want my Git activity to be scored with XP using a quality-weighting algorithm,
-So that my developer effort is quantified fairly based on what I actually do.
-
-**Acceptance Criteria:**
-
-**Given** imported or synced Git events exist for a user
-**When** the XP calculation engine processes them
-**Then** each qualifying event receives an XP value based on a heuristic quality-weighting algorithm
-**And** XP values are recorded in an XP ledger table with event reference, user ID, XP amount, and timestamp
-
-**Given** the same set of Git events for a user
-**When** XP calculation is run multiple times (including full reprocessing)
-**Then** the results are identical every time (deterministic output)
-
-**Given** the XP algorithm weights different activity types
-**When** calculating XP
-**Then** commits, pull requests, and code reviews each have distinct base weights
-**And** quality signals (e.g., PR size, review depth, merge vs close) modify the base weight
-
-**Given** a user has potential gaming patterns (e.g., many trivial split commits)
-**When** XP is calculated
-**Then** the algorithm applies anti-gaming heuristics that reduce or zero-out XP for suspicious patterns
-**And** no user-facing notification or shaming occurs (silent zero-reward)
-
-**Given** the XP engine runs after import or sync
-**When** new events arrive
-**Then** only new/unprocessed events are scored (incremental calculation)
-**And** existing XP ledger entries are not modified
-
-### Story 3.2: Level & League System
-
-As a user,
-I want my XP to translate into a clear level and league,
-So that I can see my overall progression at a glance and feel the momentum of growth.
-
-**Acceptance Criteria:**
-
-**Given** a user has accumulated XP in their ledger
-**When** the level calculation runs
-**Then** the user's level is determined based on a defined XP-per-level curve
-**And** the level result is stored on the user's progression record
-
-**Given** the XP-per-level curve
-**When** applied across a range of simulated profiles (beginner to 5+ years active)
-**Then** there is no "wall" where active developers stop feeling progress
-**And** the curve provides meaningful level-ups for both new and experienced developers
-
-**Given** a user's total XP
-**When** league assignment runs
-**Then** the user is placed in a motivation league (Bronze, Silver, Gold, Platinum, Diamond) based on personal XP thresholds
-**And** league thresholds are absolute (not competitive ranking)
-**And** every user can eventually reach Diamond through sustained activity
-**And** there is no demotion from a league once achieved
-
-**Given** a user's level or league changes
-**When** the change is persisted
-**Then** the previous and new values are recorded for later use by the Unboxing and progression UI
-
-**Given** the same XP total
-**When** level and league are calculated
-**Then** the result is always identical (deterministic)
-
-### Story 3.3: Badge & Title Awarding
-
-As a user,
-I want to earn badges and titles when I hit specific milestones,
-So that I get recognized for meaningful achievements in my coding journey.
-
-**Acceptance Criteria:**
-
-**Given** a set of predefined badge criteria exist (e.g., Bug Slayer: >=10 merged bug-fix PRs in 30 days)
-**When** the badge evaluation engine runs after XP/level computation
-**Then** the user's Git event history is checked against each badge's criteria
-**And** newly qualified badges are awarded and stored with the award timestamp
-
-**Given** a set of predefined title criteria exist (e.g., Polyglot: activity in >=3 languages above threshold)
-**When** the title evaluation engine runs
-**Then** titles are awarded when level or milestone thresholds are reached
-**And** a user can hold multiple titles simultaneously
-
-**Given** a badge or title has already been awarded to a user
-**When** the evaluation engine runs again
-**Then** it is not re-awarded or duplicated
-
-**Given** the badge and title definitions
-**When** new badge/title types are added in the future
-**Then** the engine supports adding new criteria without modifying the core evaluation logic (data-driven definitions)
-
-**Given** a user earns a badge or title
-**When** the award is persisted
-**Then** it includes the badge/title ID, user ID, criteria snapshot, and award timestamp
-
-### Story 3.4: Progression Dashboard & Badge Showcase
-
-As a user,
-I want to view my XP, level, league, badges, and titles on a dashboard,
-So that I can see my complete developer progression at a glance and choose which badges to showcase.
-
-**Acceptance Criteria:**
-
-**Given** a user is authenticated and has progression data
-**When** they navigate to their dashboard
-**Then** they see their current XP total, level, and league displayed prominently
-**And** the IdentityHero component shows their avatar, level crest, and league ring
-**And** the WhatChangedPanel shows XP gained and any level/badge changes since their last visit
-
-**Given** a user has earned badges
-**When** they view their badge collection
-**Then** all earned badges are displayed with name, description, and award date
-**And** unearned badges they are close to achieving are shown as locked with progress indicators
-
-**Given** a user wants to showcase specific badges
-**When** they select up to 6 badges for their showcase
-**Then** the selections are persisted and will appear on their public profile
-**And** they can change their showcase selection at any time
-
-**Given** a user has earned titles
-**When** they view their titles
-**Then** all earned titles are displayed
-**And** their currently active/displayed title is indicated
-
-**Given** the dashboard displays scoring information
-**When** a user looks for explanation
-**Then** at least three scoring principles are visible: "quality over quantity", "review depth matters", and "anti-gaming checks apply"
-**And** exact XP weights are not exposed
-
-**Given** the dashboard loads
-**When** data is being fetched
-**Then** skeleton loading states appear for each section
-**And** the page reaches largest contentful render within 2.5 seconds
-
----
-
-## Epic 4: Skill Tree System
-
-Users can explore interactive language skill trees that visualize their growth path with unlocked and locked nodes.
-
-### Story 4.1: Skill Tree Data Model & Generation
-
-As a user,
-I want the system to generate a language skill tree based on my coding activity,
-So that I can see a structured representation of my skills across different programming languages.
-
-**Acceptance Criteria:**
-
-**Given** a user has imported/synced Git events with language attribution
-**When** the skill tree generation engine runs
-**Then** one skill tree branch is created per detected programming language
-**And** each branch contains a hierarchy of nodes representing increasing mastery
-
-**Given** a language branch exists
-**When** the user's activity thresholds for that language are evaluated
-**Then** nodes are unlocked progressively based on Git activity volume and quality per language
-**And** unlock thresholds increase for deeper nodes in the tree
-
-**Given** an active developer (>=5 qualifying activities in the last 30 days)
-**When** the skill tree is generated
-**Then** at least one next node is reachable (unlockable within <=20 additional qualifying activities)
-**And** the growth path guarantee is validated programmatically
-
-**Given** a user has activity in a new language
-**When** the skill tree is regenerated
-**Then** a new branch appears for that language with appropriate initial node unlocks
-
-**Given** the skill tree data model
-**When** data is stored
-**Then** each node includes: node ID, language, tier/depth, unlock criteria, unlock status, and unlock timestamp
-**And** the tree structure supports the SkillGalaxyView visualization requirements
-
-### Story 4.2: Interactive Skill Tree Visualization
-
-As a user,
-I want to explore my skill trees through an interactive visual diagram,
-So that I can see my growth across languages and understand what I can unlock next.
-
-**Acceptance Criteria:**
-
-**Given** a user has skill tree data
-**When** they navigate to the skill tree view
-**Then** the SkillGalaxyView component renders with branches for each language
-**And** unlocked nodes are visually distinct from locked nodes
-**And** the growth path (next reachable nodes) is visually highlighted
-
-**Given** the skill tree is displayed
-**When** the user interacts with it
-**Then** they can pan and zoom the visualization
-**And** they can select individual nodes by clicking/tapping
-
-**Given** a user selects a node
-**When** the node detail panel opens
-**Then** it shows the node's meaning/description, unlock criteria, and earned status
-**And** if locked, it shows progress toward unlocking (e.g., "3 of 10 qualifying activities")
-
-**Given** the skill tree renders
-**When** measured for performance
-**Then** initial render completes in <=500ms
-**And** interaction frame rate remains >=50 FPS on supported devices
-
-**Given** a user navigates the skill tree with keyboard
-**When** using arrow keys, Tab, and Enter
-**Then** all nodes are reachable and selectable via keyboard
-**And** screen reader text alternatives describe each node's state and meaning
-
-**Given** a user with `prefers-reduced-motion` enabled
-**When** they view the skill tree
-**Then** transitions and animations are replaced with static or minimal-motion alternatives
-
-**Given** the skill tree is viewed on mobile (320-767px)
-**When** the layout adapts
-**Then** a condensed card-based view with touch navigation is provided
-**And** all node details remain accessible
-
----
-
-## Epic 5: The Unboxing Experience
-
-New users experience xpull's signature cinematic onboarding — a cascading reveal of their developer journey.
-
-### Story 5.1: Unboxing Cascade Engine
-
-As a new user,
-I want to experience a cascading level-unlock sequence that replays my Git progression,
-So that I feel the excitement of discovering how much I've already accomplished.
-
-**Acceptance Criteria:**
-
-**Given** a new user has completed their historical import
-**When** the Unboxing is triggered (automatically after import or via explicit start)
-**Then** a cascading sequence begins that replays the user's progression from Level 1 to their current level
-
-**Given** the cascade is running
-**When** each level is reached in the sequence
-**Then** the level number is displayed with a transition animation
-**And** any features unlocked at that level threshold are progressively revealed in the UI
-
-**Given** the user reaches levels where badges, titles, or skill tree nodes were earned
-**When** those thresholds are hit in the cascade
-**Then** the relevant achievements are highlighted within the sequence
-
-**Given** the cascade runs for up to 15 levels
-**When** measured for pacing
-**Then** each transition takes <200ms
-**And** the full cascade completes in <60 seconds including analysis time
-
-**Given** the Unboxing flow reaches completion
-**When** the final level is displayed
-**Then** a summary screen shows: current level, key unlocks, skill tree preview, and earned badges/titles
-**And** clear next-action CTAs are presented: "Explore Skill Galaxy", "View Profile", "Share Milestone"
-
-**Given** the Unboxing cascade engine
-**When** it orchestrates the sequence
-**Then** it uses precomputed progression data (not real-time calculation) for smooth pacing
-
-### Story 5.2: Unboxing Animations & User Controls
-
-As a new user,
-I want the Unboxing to be visually exciting but fully under my control,
-So that I can enjoy the experience at my own pace or skip it if I prefer.
-
-**Acceptance Criteria:**
-
-**Given** the Unboxing cascade is running
-**When** badges, titles, and skill tree nodes are revealed
-**Then** each is accompanied by a celebration animation appropriate to its significance
-
-**Given** the Unboxing is in progress
-**When** the user clicks "Skip" or "Fast Forward"
-**Then** skipping jumps directly to the final summary screen with all results
-**And** fast-forward accelerates the cascade to complete quickly
-**And** the user still sees their complete final state
-
-**Given** a user has `prefers-reduced-motion` enabled or has toggled the reduced-motion setting
-**When** the Unboxing runs
-**Then** all non-essential animations are replaced with static or minimal-motion transitions
-**And** the content and pacing remain comprehensible without animation
-
-**Given** the UnboxingCascadeController component
-**When** it renders
-**Then** it shows a sequence stage indicator, the reveal viewport, and skip/pause/fast-forward controls
-**And** controls are keyboard accessible
-
-**Given** the Unboxing is viewed on mobile
-**When** the layout adapts
-**Then** the experience is functional with appropriately sized controls and readable content
-**And** touch gestures work for controls
-
-### Story 5.3: Sparse Data & Multi-Provider Handling
-
-As a new user with limited Git history,
-I want to feel encouraged rather than disappointed by a short Unboxing,
-So that I still see xpull as valuable and want to grow my profile.
-
-**Acceptance Criteria:**
-
-**Given** a user's imported history has fewer than 50 commits
-**When** the sparse-data criteria are met
-**Then** the system displays contextual encouragement messaging
-**And** the tone is playful and constructive, not apologetic or dismissive
-
-**Given** the SparseRecoveryPanel is displayed
-**When** a sparse-data user sees it
-**Then** it explains why the output is limited (few public repos, limited history)
-**And** it presents immediate constructive actions: start/link a project, learn how XP grows, get notified for new source integrations
-
-**Given** only one Git provider (GitHub) is connected
-**When** the user views their settings or post-Unboxing screen
-**Then** a "Connect more sources" placeholder is displayed
-**And** it indicates GitLab and Bitbucket support is coming soon
-
-**Given** a sparse-data user completes Unboxing
-**When** the summary screen appears
-**Then** it frames their current state as "the beginning of your journey" rather than a low score
-**And** next-action CTAs emphasize growth opportunities
-
----
-
-## Epic 6: Developer Profile & Social Sharing
-
-Users have a public, shareable developer profile with customization, OG images, and SEO crawlability.
-
-### Story 6.1: Profile Page & Customization
-
-As a user,
-I want to view and customize my developer profile,
-So that I have a personal page that represents my coding identity the way I want.
-
-**Acceptance Criteria:**
-
-**Given** a user is authenticated
-**When** they navigate to their profile page
-**Then** they see their level, league, skill tree summary, active title, and showcased badges
-**And** the IdentityHero component displays their avatar, level crest, and league ring
-
-**Given** a user wants to customize their profile
-**When** they edit their profile settings
-**Then** they can set a bio (text field, reasonable character limit)
-**And** they can add external links (e.g., personal site, Twitter, LinkedIn)
-**And** changes are saved and immediately reflected on the profile
-
-**Given** a user wants to choose a display username
-**When** they set or change their username
-**Then** the username is validated for uniqueness, length, and allowed characters
-**And** the username determines their public profile URL path
-
-**Given** a user views their profile
-**When** the page loads
-**Then** it shows the StoryMilestoneCard feed with recent progression events
-**And** it displays the SkillGalaxyView in a mini-preview mode
-**And** the NextActionModule suggests a growth action
-
-### Story 6.2: Public Profile & SEO
-
-As a visitor (or the profile owner sharing a link),
-I want to access a developer's public profile via a clean URL that renders well for search engines,
-So that profiles are discoverable and shareable as professional developer identity pages.
-
-**Acceptance Criteria:**
-
-**Given** a user has a public profile
-**When** a visitor navigates to `xpull.dev/{username}`
-**Then** the profile page renders with the user's level, league, skill tree summary, showcased badges, title, bio, and links
-
-**Given** a public profile URL is requested
-**When** the server processes it
-**Then** the page is server-side rendered (SSR) with complete HTML content
-**And** the response includes proper semantic HTML landmarks and heading hierarchy
-
-**Given** a search engine crawler visits a public profile
-**When** it indexes the page
-**Then** the HTML contains all relevant profile content without requiring JavaScript execution
-**And** JSON-LD structured data for the developer profile is included
-
-**Given** a public profile page
-**When** measured for performance
-**Then** first contentful render is <=1.5s at p75 on standard broadband
-**And** cumulative layout shift is <=0.1
-
-**Given** a user's profile is set to private
-**When** a visitor navigates to their profile URL
-**Then** a graceful "profile not available" page is shown (not a raw 404)
-
-### Story 6.3: Social Sharing & OG Images
-
-As a user,
-I want my profile to generate rich social previews when shared on Twitter, LinkedIn, or Slack,
-So that sharing my developer identity looks impressive and drives curiosity.
-
-**Acceptance Criteria:**
-
-**Given** a public profile page
-**When** the HTML head is rendered
-**Then** Open Graph meta tags are included: og:title, og:description, og:image, og:url
-**And** Twitter Card meta tags are included for optimized Twitter/X previews
-
-**Given** a profile needs an OG image
-**When** the image is generated
-**Then** a dynamic OG image is created per profile showing: skill tree summary visualization, current level, league emblem, and username
-**And** the image dimensions conform to OG image best practices (1200x630)
-
-**Given** a user's progression changes (level up, new badge, etc.)
-**When** their profile is next shared
-**Then** the OG image reflects the updated state
-
-**Given** a profile URL is pasted in Slack, Twitter, LinkedIn, or iMessage
-**When** the platform fetches the preview
-**Then** a rich card appears with the profile title, description, and dynamic OG image
-
----
-
-## Epic 7: Data Privacy & Account Management
-
-Users can control their data, manage privacy settings, and fully delete their account — building trust through transparency.
-
-### Story 7.1: Data Privacy & Protection
-
-As a user,
-I want xpull to protect my private repository information and store only what's necessary,
-So that I can trust the platform with my Git data.
-
-**Acceptance Criteria:**
-
-**Given** a user has imported data from private repositories
-**When** any public-facing surface renders (public profile, OG images, shared content)
-**Then** private repository names, file paths, and code content never appear
-**And** only aggregate language/activity metrics are shown for private repo contributions
-
-**Given** the system stores Git-derived data
-**When** data is persisted
-**Then** only derived metrics and metadata are stored (XP, language attribution, event type, timestamps)
-**And** raw code, full diffs, and comment thread content are excluded from storage
-
-**Given** the data storage model
-**When** reviewed for compliance
-**Then** no user data allows reconstruction of source code or repository file structure
-**And** the data minimization principle is enforced at the ingestion layer (not just display layer)
-
-### Story 7.2: Data Transparency & Account Deletion
-
-As a user,
-I want to see what data xpull has collected about me and be able to delete everything,
-So that I remain in full control of my information.
-
-**Acceptance Criteria:**
-
-**Given** a user navigates to their data/privacy settings
-**When** they request to view their collected data
-**Then** they see a summary of: connected accounts, imported repositories, total events processed, derived metrics stored, and date ranges
-
-**Given** a user wants to disconnect their GitHub account
-**When** they click "Disconnect GitHub"
-**Then** a confirmation dialog explains what will happen
-**And** upon confirmation, the OAuth token is revoked/deleted, webhooks are unregistered, and all imported Git events and derived data for that account are permanently deleted
-
-**Given** a user wants to delete their entire account
-**When** they click "Delete Account"
-**Then** a confirmation dialog requires explicit confirmation (e.g., typing username)
-**And** upon confirmation, all user data is permanently deleted: profile, progression, badges, skill trees, imported events, OAuth tokens
-**And** the username is released
-**And** the operation completes and the user is signed out
-
-**Given** a deletion is requested
-**When** the deletion process runs
-**Then** it completes within a reasonable timeframe and the user receives confirmation
-**And** deleted data is not recoverable
-
-### Story 7.3: Profile Visibility Controls
-
-As a user,
-I want to control whether my profile is public or private,
-So that I can choose when and how my developer identity is visible to others.
-
-**Acceptance Criteria:**
-
-**Given** a user navigates to their privacy settings
-**When** they toggle profile visibility
-**Then** they can switch between "public" and "private" modes
-**And** the change takes effect immediately
-
-**Given** a profile is set to public
-**When** a visitor navigates to the user's profile URL
-**Then** the full public profile renders with progression, skill trees, badges, and bio
-
-**Given** a profile is set to private
-**When** a visitor navigates to the user's profile URL
-**Then** a graceful "this profile is not publicly available" message is shown
-**And** no progression data, skill tree, or badge information is revealed
-**And** search engines receive appropriate signals to not index the page (noindex)
-
-**Given** a new user creates an account
-**When** no visibility preference has been set
-**Then** the default visibility is public (encouraging sharing)
-**And** the user is informed of this default during onboarding with an easy way to change it
-
----
-
-## Epic 8: Platform Operations & Monitoring
-
-The platform operator can monitor sync health, investigate failures, view aggregate metrics, and receive alerts.
-
-### Story 8.1: Sync Pipeline Health Dashboard
-
-As a platform operator,
-I want to view the health of the Git sync pipeline and investigate failures,
-So that I can keep the platform running smoothly and fix issues before users notice.
-
-**Acceptance Criteria:**
-
-**Given** the operator is authenticated with admin role
-**When** they navigate to the admin dashboard
-**Then** they see a sync pipeline health overview showing: active webhooks, queue depth, processing rate, and recent error rate
-
-**Given** the pipeline health dashboard is displayed
-**When** errors have occurred
-**Then** the operator sees a list of recent sync/import failures with: user reference, error type, timestamp, and retry status
-**And** they can click into an individual failure to see detailed error information and event context
-
-**Given** an import has failed after all retries
-**When** the operator views it
-**Then** they see the failure reason, number of retries attempted, and the data state at point of failure
-**And** they can trigger a manual retry if appropriate
-
-**Given** the pipeline is operating normally
-**When** the operator views the dashboard
-**Then** key health indicators show green status
-**And** recent processing throughput is visible
-
-### Story 8.2: Platform Metrics & Alerting
-
-As a platform operator,
-I want to see aggregate platform metrics and receive alerts when things go wrong,
-So that I can understand platform health and respond to incidents quickly.
-
-**Acceptance Criteria:**
-
-**Given** the operator is on the admin dashboard
-**When** they view platform metrics
-**Then** they see aggregate data: total users, active users (last 7/30 days), Unboxing completion count and rate, and import success rate
-
-**Given** the import or webhook error rate exceeds 5%
-**When** this threshold is sustained for 5 consecutive minutes
-**Then** an alert is triggered and visible in the admin dashboard
-**And** the alerting mechanism supports future extension to email/Slack notifications
-
-**Given** the platform is under load
-**When** up to 1,000 users are active
-**Then** the system operates without degradation
-**And** API latency remains within p95 <=500ms targets
-**And** error rate stays <=1%
-
-**Given** the metrics dashboard
-**When** it displays data
-**Then** metrics are refreshed at a reasonable interval (not real-time, but within minutes)
-**And** historical trends are visible for at least the last 7 days
+## Epic-to-Issue Mapping
+
+| Epic | GitHub Issue | Issue ID |
+|------|-------------|----------|
+| Epic 1: Project Foundation & Developer Authentication | #3 | I_kwDORRrwu87rn21m |
+| Epic 2: Git Data Ingestion Pipeline | #4 | I_kwDORRrwu87rn3IY |
+| Epic 3: Developer Progression Engine | #5 | I_kwDORRrwu87rn3hI |
+| Epic 4: Skill Tree System | #6 | I_kwDORRrwu87rn3yJ |
+| Epic 5: The Unboxing Experience | #7 | I_kwDORRrwu87rn4JU |
+| Epic 6: Developer Profile & Social Sharing | #8 | I_kwDORRrwu87rn4gS |
+| Epic 7: Platform Operations & Observability | #9 | I_kwDORRrwu87rn4yB |

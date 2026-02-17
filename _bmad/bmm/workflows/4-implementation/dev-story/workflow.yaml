@@ -1,5 +1,5 @@
 name: dev-story
-description: "Execute a story by implementing tasks/subtasks, writing tests, validating, and updating the story file per acceptance criteria"
+description: "Execute a story: assign GitHub issue, create branch & draft PR, implement tasks, on completion mark PR ready for review"
 author: "BMad"
 
 # Critical variables from config
@@ -10,12 +10,18 @@ user_skill_level: "{config_source}:user_skill_level"
 document_output_language: "{config_source}:document_output_language"
 date: system-generated
 
+# GitHub Configuration
+github_owner: "{config_source}:github_owner"
+github_repo: "{config_source}:github_repo"
+
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/dev-story"
 instructions: "{installed_path}/instructions.xml"
 validation: "{installed_path}/checklist.md"
 
-story_file: "" # Explicit story path; auto-discovered if empty
+# PR Template
+pr_template: "{project-root}/.github/PULL_REQUEST_TEMPLATE.md"
+
+story_file: ""
 implementation_artifacts: "{config_source}:implementation_artifacts"
-sprint_status: "{implementation_artifacts}/sprint-status.yaml"
 project_context: "**/project-context.md"
