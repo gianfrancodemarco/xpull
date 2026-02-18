@@ -1,0 +1,69 @@
+name: "CI Pipeline & Code Quality Gates"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+env:
+  DATABASE_URL: "postgresql://xpull:xpull_dev@localhost:5432/xpull_dev"
+  AUTH_SECRET: "xpull_ci_secret_placeholder"
+  NEXTAUTH_URL: "http://localhost:3000"
+  AUTH_GITHUB_ID: "ci-placeholder"
+  AUTH_GITHUB_SECRET: "ci-placeholder"
+
+jobs:
+  ci:
+    name: "CI checks"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: xpull
+          POSTGRES_PASSWORD: xpull_dev
+          POSTGRES_DB: xpull_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U xpull -d xpull_dev"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup pnpm"
+        uses: pnpm/action-setup@v2
+        with:
+          version: "10.30.0"
+
+      - name: "Cache pnpm store"
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles("pnpm-lock.yaml") }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: "Install dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "Typecheck"
+        run: pnpm typecheck
+
+      - name: "Unit & integration tests"
+        run: pnpm test
+
+      - name: "Build application"
+        run: pnpm build
+
+      - name: "Playwright end-to-end tests"
+        run: pnpm test:e2e
+
+      - name: "Log shared observability helpers"
+        run: |
+          echo "Shared error helper: shared/lib/errors.ts"
+          echo "Shared correlation helper: shared/lib/correlation-id.ts"
