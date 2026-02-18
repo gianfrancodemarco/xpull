@@ -1,6 +1,6 @@
 ---
 name: 'sprint-status'
-description: 'Summarize sprint-status.yaml, surface risks, and route to the right implementation workflow.'
+description: 'Summarize GitHub sprint status, surface risks, and route to the right implementation workflow.'
 disable-model-invocation: true
 ---
 

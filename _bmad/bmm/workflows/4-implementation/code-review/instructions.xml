@@ -169,7 +169,7 @@
     </check>
   </step>
 
-  <step n="5" goal="Update GitHub issue status and sync sprint tracking">
+  <step n="5" goal="Update GitHub issue status and (optional) sync tracking via GitHub">
     <!-- Determine new status based on review outcome -->
     <check if="all HIGH and MEDIUM issues fixed AND all ACs implemented">
       <action>Set {{new_status}} = "done"</action>
@@ -181,38 +181,21 @@
       <action>Update GitHub issue #{story_issue_number} Dev Agent Record status to "in-progress"</action>
     </check>
 
-    <!-- Determine sprint tracking status -->
-    <check if="{sprint_status} file exists">
-      <action>Set {{current_sprint_status}} = "enabled"</action>
-    </check>
-    <check if="{sprint_status} file does NOT exist">
-      <action>Set {{current_sprint_status}} = "no-sprint-tracking"</action>
+    <!-- Sync tracking via GitHub (preferred): use `gh` CLI to update issue labels or close issue -->
+    <action>Attempt to run `gh` CLI to update the story issue: set/replace labels or close the issue according to {{new_status}}</action>
+    <check if="gh CLI not available or not configured">
+      <output>ℹ️ Story status updated on GitHub failed: `gh` CLI not available or not configured. Please install/configure `gh` to enable automatic tracking sync.</output>
     </check>
 
-    <!-- Sync sprint-status.yaml when story status changes (only if sprint tracking enabled) -->
-    <check if="{{current_sprint_status}} != 'no-sprint-tracking'">
-      <action>Load the FULL file: {sprint_status}</action>
-      <action>Find development_status key matching {{story_key}}</action>
-
+    <check if="gh CLI available">
       <check if="{{new_status}} == 'done'">
-        <action>Update development_status[{{story_key}}] = "done"</action>
-        <action>Save file, preserving ALL comments and structure</action>
-        <output>✅ Sprint status synced: {{story_key}} → done</output>
+        <action>Run: `gh issue edit #{story_issue_number} --add-label done --repo {github_owner}/{github_repo}`</action>
+        <output>✅ GitHub issue updated: {{story_key}} → done</output>
       </check>
-
       <check if="{{new_status}} == 'in-progress'">
-        <action>Update development_status[{{story_key}}] = "in-progress"</action>
-        <action>Save file, preserving ALL comments and structure</action>
-        <output>🔄 Sprint status synced: {{story_key}} → in-progress</output>
+        <action>Run: `gh issue edit #{story_issue_number} --add-label in-progress --repo {github_owner}/{github_repo}`</action>
+        <output>🔄 GitHub issue updated: {{story_key}} → in-progress</output>
       </check>
-
-      <check if="story key not found in sprint status">
-        <output>⚠️ Story file updated, but sprint-status sync failed: {{story_key}} not found in sprint-status.yaml</output>
-      </check>
-    </check>
-
-    <check if="{{current_sprint_status}} == 'no-sprint-tracking'">
-      <output>ℹ️ Story status updated (no sprint tracking configured)</output>
     </check>
 
     <output>**✅ Review Complete!**

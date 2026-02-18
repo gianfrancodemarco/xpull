@@ -1,0 +1,22 @@
+{
+  "cmlryuuvp0000nx30tw7gz4ul": [
+    {
+      "id": "1",
+      "name": "xpull-server",
+      "full_name": "gianfrancodemarco/xpull-server",
+      "allowed": true
+    },
+    {
+      "id": "2",
+      "name": "xpull-web",
+      "full_name": "gianfrancodemarco/xpull-web",
+      "allowed": true
+    },
+    {
+      "id": "3",
+      "name": "other-repo",
+      "full_name": "gianfrancodemarco/other-repo",
+      "allowed": false
+    }
+  ]
+}

@@ -61,7 +61,7 @@ If intent is unclear, ask:
 
 If user intent is unclear:
 
-- If `{implementation_artifacts}/sprint-status.yaml` exists → **Epic-Level Mode**
+- If the GitHub repository contains epic issues (label `epic`) → **Epic-Level Mode** (use `gh` CLI to detect)
 - Otherwise → **System-Level Mode**
 
 ### C) Ambiguous → Ask
