@@ -15,11 +15,10 @@
   <critical>Do not review files that are not part of the application's source code. Always exclude the _bmad/ and _bmad-output/ folders from the review. Always exclude IDE and CLI configuration folders like .cursor/ and .windsurf/ and .claude/</critical>
 
 
-  <step n="1" goal="Load story and discover changes">
-    <action>Use provided {{story_path}} or ask user which story file to review</action>
-    <action>Read COMPLETE story file</action>
-    <action>Set {{story_key}} = extracted key from filename (e.g., "1-2-user-authentication.md" → "1-2-user-authentication") or story
-      metadata</action>
+  <step n="1" goal="Load GitHub issue and discover changes">
+    <action>Use provided #{story_issue_number} or ask user which issue to review</action>
+    <action>Read COMPLETE issue body</action>
+    <action>Set {{story_key}} = extracted key from metadata, issue title, or Dev Agent Record</action>
     <action>Parse sections: Story, Acceptance Criteria, Tasks/Subtasks, Dev Agent Record → File List, Change Log</action>
 
     <!-- Discover actual changes via git -->
@@ -58,6 +57,8 @@
 
   <step n="3" goal="Execute adversarial review">
     <critical>VALIDATE EVERY CLAIM - Check git reality vs story claims</critical>
+
+    <action>For each verification step that succeeds, update GitHub issue #{story_issue_number} description to mark the step as complete</action>
 
     <!-- Git vs Story Discrepancies -->
     <action>Review git vs story File List discrepancies:
@@ -168,17 +169,17 @@
     </check>
   </step>
 
-  <step n="5" goal="Update story status and sync sprint tracking">
+  <step n="5" goal="Update GitHub issue status and sync sprint tracking">
     <!-- Determine new status based on review outcome -->
     <check if="all HIGH and MEDIUM issues fixed AND all ACs implemented">
       <action>Set {{new_status}} = "done"</action>
-      <action>Update story Status field to "done"</action>
+      <action>Update GitHub issue #{story_issue_number} Dev Agent Record status to "done"</action>
+      <action>Update pull request #{pr_number} on {github_owner}/{github_repo}: set draft = false and flag as ready for review</action>
     </check>
     <check if="HIGH or MEDIUM issues remain OR ACs not fully implemented">
       <action>Set {{new_status}} = "in-progress"</action>
-      <action>Update story Status field to "in-progress"</action>
+      <action>Update GitHub issue #{story_issue_number} Dev Agent Record status to "in-progress"</action>
     </check>
-    <action>Save story file</action>
 
     <!-- Determine sprint tracking status -->
     <check if="{sprint_status} file exists">
