@@ -7,6 +7,8 @@ import { tokens } from "~/shared/ui/theme/tokens";
 
 type DashboardViewProps = {
   userName: string;
+  userEmail?: string;
+  userAvatar?: string;
 };
 
 const stats = [
@@ -62,6 +64,15 @@ export default function DashboardView({ userName }: DashboardViewProps) {
     <main className={styles.main} style={{ color: tokens.colors.textPrimary }}>
       <section className={styles.hero}>
         <p className={styles.heroLabel}>Weekly Progress Check</p>
+        <div className={styles.heroUser}>
+          {userAvatar ? (
+            <img className={styles.heroAvatar} src={userAvatar} alt={`${userName} avatar`} />
+          ) : null}
+          <div className={styles.heroUserInfo}>
+            <p className={styles.heroUserName}>{userName}</p>
+            <p className={styles.heroUserEmail}>{userEmail ?? "No email provided"}</p>
+          </div>
+        </div>
         <h1 className={styles.heroTitle}>Story Feed ready for {userName}</h1>
         <p className={styles.heroText}>
           The feed surfaces what changed, why it matters, and what to do next. Every pulse maps to real GitHub activity, so the

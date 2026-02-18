@@ -25,7 +25,7 @@ sequenceDiagram
   NextAuthRoute->>Database: PrismaAdapter persists User, Account, Session
   NextAuthRoute->>Browser: set session cookie & redirect /dashboard
   Browser->>DashboardPage: GET /dashboard
-  DashboardPage->>NextAuthRoute: `getServerSession`
+  DashboardPage->>NextAuthRoute: `auth()`
   NextAuthRoute->>Database: validate session, join user
   DashboardPage->>Browser: render welcome with session data
 ```
@@ -37,7 +37,7 @@ graph LR
   B --> C[/api/auth/[...nextauth]/route.ts]
   C --> D[GitHub OAuth provider]
   C --> E[PrismaAdapter → `db` → Postgres]
-  F[Dashboard `getServerSession`] --> C
+  F[Dashboard `auth()`] --> C
   E --> G[Account / Session / User rows]
 ```
 
@@ -154,19 +154,24 @@ model User {
 }
 ```
 
-Later, `getServerSession(authConfig)` reuses the same configuration and adapter logic to hydrate the dashboard. If a session cookie matches a live session in the database, the user’s name is injected into the view and drives the personalized copy.
+Later, the dashboard calls `auth()` from the same auth module. It returns the session that was just persisted via the Prisma adapter, so the view can read `user.name`, `user.email`, and `user.image` to personalize the feed.
 
 ```1:10:src/app/dashboard/page.tsx
-import { getServerSession } from "next-auth/next";
-
-import { authConfig } from "~/server/auth/config";
+import { auth } from "~/server/auth";
 import DashboardView from "./dashboard-view";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authConfig);
-  const userName = session?.user?.name ?? "xpull Citizen";
+  const session = await auth();
+  const user = session?.user ?? {};
+  const userName = user.name ?? "xpull Citizen";
 
-  return <DashboardView userName={userName} />;
+  return (
+    <DashboardView
+      userName={userName}
+      userEmail={user.email ?? undefined}
+      userAvatar={user.image ?? undefined}
+    />
+  );
 }
 ```
 

@@ -78,6 +78,39 @@
   flex-wrap: wrap;
 }
 
+.heroUser {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.heroAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.heroUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.heroUserName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #eaf0ff;
+}
+
+.heroUserEmail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(234, 240, 255, 0.6);
+}
+
 .heroMetaItem {
   display: flex;
   flex-direction: column;
