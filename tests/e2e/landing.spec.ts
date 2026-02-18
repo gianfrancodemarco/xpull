@@ -18,5 +18,6 @@ test.describe("Landing experience", () => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: /story feed ready for/i })).toBeVisible();
     await expect(page.getByText(/weekly progress check/i)).toBeVisible();
+    await expect(page.getByText(/collected info/i)).toBeVisible();
   });
 });

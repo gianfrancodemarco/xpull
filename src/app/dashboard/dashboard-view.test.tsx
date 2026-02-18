@@ -10,5 +10,6 @@ describe("Dashboard view", () => {
     expect(screen.getByRole("heading", { name: /story feed ready for jamie/i })).toBeInTheDocument();
     expect(screen.getByText(/weekly progress check/i)).toBeInTheDocument();
     expect(screen.getByText(/refresh feed/i)).toBeInTheDocument();
+    expect(screen.getByText(/collected info/i)).toBeInTheDocument();
   });
 });

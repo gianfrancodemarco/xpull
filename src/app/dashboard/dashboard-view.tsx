@@ -39,6 +39,24 @@ const nextActions = [
   },
 ];
 
+const collectedInfo = [
+  {
+    label: "Collected info",
+    value: "18,594 commits",
+    detail: "Historical data imported from GitHub + relevant tags.",
+  },
+  {
+    label: "Repos synced",
+    value: "47 repos",
+    detail: "Each repo keeps XP, league, and badge history in sync.",
+  },
+  {
+    label: "Signals tracked",
+    value: "12 badges",
+    detail: "Badge progress recorded with correlation IDs for observability.",
+  },
+];
+
 export default function DashboardView({ userName }: DashboardViewProps) {
   return (
     <main className={styles.main} style={{ color: tokens.colors.textPrimary }}>
@@ -90,6 +108,15 @@ export default function DashboardView({ userName }: DashboardViewProps) {
           <article key={action.title} className={styles.actionCard}>
             <p className={styles.actionTitle}>{action.title}</p>
             <p className={styles.actionDetail}>{action.detail}</p>
+          </article>
+        ))}
+      </section>
+      <section className={styles.collected}>
+        {collectedInfo.map((info) => (
+          <article key={info.label} className={styles.collectedCard}>
+            <p className={styles.collectedLabel}>{info.label}</p>
+            <p className={styles.collectedValue}>{info.value}</p>
+            <p className={styles.collectedDetail}>{info.detail}</p>
           </article>
         ))}
       </section>
