@@ -68,7 +68,7 @@ export default function Home() {
     <main className={styles.main} style={themeVars}>
       <section className={styles.heroPanel}>
         <div className={styles.heroText}>
-          <p className={styles.heroBadge}>Neo Arcade Progress</p>
+          <p className={styles.heroBadge}>Progress map</p>
           <h1 className={styles.heroTitle}>Turn quiet work into your neon legend</h1>
           <p className={styles.heroDescription}>
             Every commit, review, and badge already tells a story. xpull rewinds that narrative, lights up the key wins, and
