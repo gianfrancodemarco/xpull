@@ -1,0 +1,21 @@
+:root {
+  font-family: var(--font-inter, Inter), system-ui, sans-serif;
+  color: #eaf0ff;
+  background-color: #0b1020;
+  min-height: 100%;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
