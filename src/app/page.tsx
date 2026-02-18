@@ -17,38 +17,38 @@ type ThemeVars = CSSProperties & {
 };
 
 const stats = [
-  { value: "12,800 XP", label: "historical progress captured" },
-  { value: "24 nodes", label: "languages lighting skill tree branches" },
-  { value: "+3 leagues", label: "levels unlocked during the Unboxing cascade" },
+  { value: "12,800 XP", label: "archived from every merged PR" },
+  { value: "24 nodes", label: "active skill tree beacons" },
+  { value: "+3 leagues", label: "secret thresholds unlocked during replay" },
 ];
 
 const highlights = [
   {
-    title: "Cinematic Unboxing",
-    detail: "A cascading reveal of levels, XP, and badges makes your history feel cinematic instead of static.",
+    title: "Neon progress map",
+    detail: "A bold grid of XP pulses, badge flares, and league glows that make even quiet weeks feel epic.",
   },
   {
-    title: "Trust tied to GitHub data",
-    detail: "Every stat references real commits, PRs, or reviews so you know this story is earned.",
+    title: "GitHub truth",
+    detail: "Every pulse matches a real commit, review, or badge so you trust the glow without wondering how it happened.",
   },
   {
-    title: "Clear next action",
-    detail: "Single CTA to connect GitHub plus a softer prompt to explore why your profile matters.",
+    title: "One button to launch",
+    detail: "Tap ‘Activate GitHub’ and we start the cascade that turns your history into a living identity.",
   },
 ];
 
 const trustNotes = [
   {
-    title: "GitHub OAuth + Next-auth",
-    detail: "JWT sessions start the instant you authorize the connection so the rest of the flow stays secure.",
+    title: "Secure OAuth heartbeat",
+    detail: "Next-auth guards the session. When you disconnect, the link, token, and audit traces vanish instantly.",
   },
   {
-    title: "Typed envelopes",
-    detail: "Responses include the x-xpull-correlation-id meta header so we can trace every analysis job.",
+    title: "Correlation-first telemetry",
+    detail: "Every folder returns `x-xpull-correlation-id` so operations can replay one request from end to end.",
   },
   {
-    title: "Anti-pressure UX",
-    detail: "WCAG-friendly layout, single primary CTA, and reassuring copy keep the landing page calm and confident.",
+    title: "Playful, pressure-free tone",
+    detail: "No rush messages—just clear status updates and a single CTA so the experience feels confident, not frantic.",
   },
 ];
 
@@ -68,11 +68,11 @@ export default function Home() {
     <main className={styles.main} style={themeVars}>
       <section className={styles.heroPanel}>
         <div className={styles.heroText}>
-          <p className={styles.heroBadge}>Neo Arcade / Landing</p>
-          <h1 className={styles.heroTitle}>From invisible commits to living XP</h1>
+          <p className={styles.heroBadge}>Neo Arcade Progress</p>
+          <h1 className={styles.heroTitle}>Turn quiet work into your neon legend</h1>
           <p className={styles.heroDescription}>
-            xpull turns your existing GitHub history into a cinematic Unboxing, level summary, and skill tree
-            spotlight before you even log in. Every stat ties back to real activity so you can trust the story.
+            Every commit, review, and badge already tells a story. xpull rewinds that narrative, lights up the key wins, and
+            hands you a glowing path to share, show off, and keep growing.
           </p>
           <div className={styles.ctaGroup}>
             <Link className={styles.primaryCta} href="/sign-in">
