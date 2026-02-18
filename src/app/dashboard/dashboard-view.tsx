@@ -59,7 +59,7 @@ const collectedInfo = [
   },
 ];
 
-export default function DashboardView({ userName }: DashboardViewProps) {
+export default function DashboardView({ userName, userEmail, userAvatar }: DashboardViewProps) {
   return (
     <main className={styles.main} style={{ color: tokens.colors.textPrimary }}>
       <section className={styles.hero}>
