@@ -30,13 +30,19 @@ AUTH_GITHUB_SECRET=<your-client-secret>
 - Connect your personal GitHub account or create a dedicated testing account to avoid hitting rate limits or exposing sensitive repositories.
 - Use GitHub settings to revoke the app or rotate the secret if the credentials are shared.
 
-## 4. Run the app locally
+## 4. Run the app locally via Docker Compose
 
 1. Install dependencies: `pnpm install`.
-2. Start Postgres via `docker-compose up -d postgres` (see `docker-compose.yml`).
-3. Run migrations: `pnpm db:generate` / `pnpm db:migrate`.
-4. Launch the dev server: `pnpm dev`.
-5. Visit `http://localhost:3000` and click **Connect GitHub**; the OAuth prompt will redirect back to `next-auth`.
+2. Build Postgres + web services (includes regenerated Prisma client) with `docker compose build web`.
+3. Start the stack: `docker compose up -d postgres web`.
+4. Once Postgres is healthy, run migrations inside the `web` container so Prisma picks up the Linux binary target:
+   ```bash
+   docker compose exec web pnpm db:generate
+   ```
+5. Restart the web service so it loads the freshly generated client: `docker compose restart web`.
+6. Visit `http://localhost:3000`, click **Connect GitHub**, and complete the OAuth prompt.
+
+> Tip: the web service already mounts the current directory, so you can regenerate Prisma client locally (step 4) without rebuilding the image—just restart the container afterwards.
 
 ## 5. Testing with Playwright
 
