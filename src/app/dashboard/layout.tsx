@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div>
       <TopAppBar user={user} />
-      <main style={{ paddingTop: 72 }}>{children}</main>
+      <main style={{ paddingTop: 8 }}>{children}</main>
     </div>
   );
 }
