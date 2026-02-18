@@ -25,7 +25,7 @@ sequenceDiagram
   NextAuthRoute->>Database: PrismaAdapter persists User, Account, Session
   NextAuthRoute->>Browser: set session cookie & redirect /dashboard
   Browser->>DashboardPage: GET /dashboard
-  DashboardPage->>NextAuthRoute: `auth()`
+  DashboardPage->>NextAuthRoute: `getServerSession(authConfig)`
   NextAuthRoute->>Database: validate session, join user
   DashboardPage->>Browser: render welcome with session data
 ```
@@ -33,12 +33,12 @@ sequenceDiagram
 ### Component diagram
 ```mermaid
 graph LR
-  A[SignIn Page (client)] --> B[NextAuth React helpers (`signIn`)]
-  B --> C[/api/auth/[...nextauth]/route.ts]
-  C --> D[GitHub OAuth provider]
-  C --> E[PrismaAdapter → `db` → Postgres]
-  F[Dashboard `auth()`] --> C
-  E --> G[Account / Session / User rows]
+  A["SignIn Page (client)"] --> B["NextAuth React helpers (signIn)"]
+  B --> C["/api/auth/[...nextauth]/route.ts"]
+  C --> D["GitHub OAuth provider"]
+  C --> E["PrismaAdapter → db → Postgres"]
+  F["Dashboard getServerSession"] --> C
+  E --> G["Account / Session / User rows"]
 ```
 
 ## Step-by-step narrative
@@ -154,24 +154,19 @@ model User {
 }
 ```
 
-Later, the dashboard calls `auth()` from the same auth module. It returns the session that was just persisted via the Prisma adapter, so the view can read `user.name`, `user.email`, and `user.image` to personalize the feed.
+Later, the dashboard calls `getServerSession(authConfig)` so it can read the active session (name/email/avatar) that was persisted via the Prisma adapter before rendering the feed.
 
-```1:10:src/app/dashboard/page.tsx
-import { auth } from "~/server/auth";
+```1:15:src/app/dashboard/page.tsx
+import { getServerSession } from "next-auth/next";
+
+import { authConfig } from "~/server/auth/config";
 import DashboardView from "./dashboard-view";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  const user = session?.user ?? {};
-  const userName = user.name ?? "xpull Citizen";
+  const session = await getServerSession(authConfig);
+  const userName = session?.user?.name ?? "xpull Citizen";
 
-  return (
-    <DashboardView
-      userName={userName}
-      userEmail={user.email ?? undefined}
-      userAvatar={user.image ?? undefined}
-    />
-  );
+  return <DashboardView userName={userName} />;
 }
 ```
 
