@@ -209,8 +209,9 @@ FR48: Epic 7 (#9) - Support 1,000 users
 ## Epic List
 
 ### Epic 1: Project Foundation & Developer Authentication (GitHub Issue #3)
-Users can sign up with GitHub OAuth, access the platform, and manage their connection. Scaffolds project foundation (T3 App, Docker Compose, PostgreSQL, CI, auth, error envelope, project structure).
+Users can sign up with GitHub OAuth, access the platform, and manage their connection. Scaffolds project foundation (T3 App, Docker Compose, PostgreSQL, CI, auth, error envelope, project structure). Includes authenticated navigation shell for post-login route access.
 **FRs covered:** FR1, FR2, FR8
+**Stories:** 1.1 (#10), 1.2 (#11), 1.3 (#12), 1.4 (#13), 1.5 (#18 — Authenticated Navigation Shell, added via sprint-change-proposal-2026-02-18)
 
 ### Epic 2: Git Data Ingestion Pipeline (GitHub Issue #4)
 Users have their real-world coding activity automatically imported and kept in sync, with privacy-safe data handling.
