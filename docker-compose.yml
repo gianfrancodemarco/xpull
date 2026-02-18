@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: xpull
+      POSTGRES_PASSWORD: xpull_dev
+      POSTGRES_DB: xpull_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xpull -d xpull_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://xpull:xpull_dev@postgres:5432/xpull_dev
+      AUTH_SECRET: "${AUTH_SECRET}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL}"
+      AUTH_GITHUB_ID: "${AUTH_GITHUB_ID}"
+      AUTH_GITHUB_SECRET: "${AUTH_GITHUB_SECRET}"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["pnpm", "dev"]
+
+volumes:
+  postgres_data:
