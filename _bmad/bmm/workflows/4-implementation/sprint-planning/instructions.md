@@ -105,7 +105,7 @@
 **Next Steps:**
 1. Run `create-story` to enrich backlog stories with dev context
 2. Run `dev-story` to start implementing ready-for-dev stories
-3. Run `sprint-status` to check progress at any time
+3. Use the `gh` CLI to check progress and list epics/issues (e.g., `gh issue list --label epic --repo {github_owner}/{github_repo}`)
 ```
 </step>
 

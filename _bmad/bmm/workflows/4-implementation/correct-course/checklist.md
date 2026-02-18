@@ -253,11 +253,11 @@
 </check-item>
 
 <check-item id="6.4">
-<prompt>Update sprint-status.yaml to reflect approved epic changes</prompt>
-<action>If epics were added: Add new epic entries with status 'backlog'</action>
-<action>If epics were removed: Remove corresponding entries</action>
-<action>If epics were renumbered: Update epic IDs and story references</action>
-<action>If stories were added/removed: Update story entries within affected epics</action>
+<prompt>Update GitHub epics to reflect approved epic changes (use `gh` CLI)</prompt>
+<action>If epics were added: Create new epic issues on GitHub with label `epic` and set status via labels (e.g., `backlog`)</action>
+<action>If epics were removed: Close or remove corresponding epic issues on GitHub</action>
+<action>If epics were renumbered: Update issue titles/links and any story references to match new epic naming</action>
+<action>If stories were added/removed: Create or close story issues and link them to their parent epic issue</action>
 <status>[ ] Done / [ ] N/A / [ ] Action-needed</status>
 </check-item>
 

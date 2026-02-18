@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authConfig } from "~/server/auth/config";
+import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
 export async function POST() {
-  const session = await getServerSession(authConfig as any);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const userId = session.user.id as string;
+  const userId = (session as any).user?.id as string;
 
   try {
     // Attempt to remove GitHub-related Account & Session rows via Prisma
