@@ -1,0 +1,244 @@
+.collected {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.collectedCard {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.collectedLabel {
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(234, 240, 255, 0.6);
+  margin: 0;
+}
+
+.collectedValue {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #32d583;
+}
+
+.collectedDetail {
+  margin: 0;
+  color: rgba(234, 240, 255, 0.7);
+  line-height: 1.4;
+}
+.main {
+  min-height: 100vh;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: radial-gradient(circle at top right, #1a2b4c 0%, rgba(11, 16, 32, 0.9) 60%), #070a16;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(124, 77, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.heroLabel {
+  letter-spacing: 0.35em;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: rgba(234, 240, 255, 0.8);
+}
+
+.heroTitle {
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  margin: 0;
+  color: #eaf0ff;
+}
+
+.heroText {
+  margin: 0;
+  color: rgba(234, 240, 255, 0.8);
+  line-height: 1.6;
+}
+
+.heroMeta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.heroUser {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.heroAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.heroUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.heroUserName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #eaf0ff;
+}
+
+.heroUserEmail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(234, 240, 255, 0.6);
+}
+
+.heroMetaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+  color: rgba(234, 240, 255, 0.7);
+}
+
+.heroMetaItem strong {
+  font-size: 1.2rem;
+  color: #ffc857;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: rgba(18, 25, 50, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #00d1ff;
+}
+
+.statLabel {
+  margin: 0;
+  color: rgba(234, 240, 255, 0.7);
+  line-height: 1.4;
+}
+
+.feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.feedCard {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.feedLabel {
+  font-size: 0.78rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(234, 240, 255, 0.55);
+  margin: 0;
+}
+
+.feedTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #eaf0ff;
+}
+
+.feedText {
+  margin: 0;
+  color: rgba(234, 240, 255, 0.75);
+  line-height: 1.45;
+}
+
+.actions {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.actionCard {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.15), rgba(0, 209, 255, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.actionTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  color: #00d1ff;
+}
+
+.actionDetail {
+  margin: 0;
+  color: rgba(11, 16, 32, 0.9);
+  line-height: 1.4;
+}
+
+.ctaRow {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ctaButton {
+  border-radius: 999px;
+  padding: 0.85rem 1.75rem;
+  border: none;
+  font-weight: 600;
+  background-color: #7c4dff;
+  color: #0b1020;
+  cursor: pointer;
+}
+
+.ctaOutline {
+  border-radius: 999px;
+  padding: 0.85rem 1.75rem;
+  border: 1px solid rgba(234, 240, 255, 0.5);
+  background: transparent;
+  font-weight: 600;
+  color: #eaf0ff;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .heroMeta {
+    flex-direction: column;
+  }
+}
