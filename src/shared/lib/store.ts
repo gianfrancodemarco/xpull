@@ -4,8 +4,10 @@ import { configureStore } from "@reduxjs/toolkit";
 import type { TypedUseSelectorHook } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";
 
+const rootReducer = (state: Record<string, never> = {}) => state;
+
 export const store = configureStore({
-  reducer: {},
+  reducer: rootReducer,
   devTools: process.env.NODE_ENV !== "production",
 });
 
