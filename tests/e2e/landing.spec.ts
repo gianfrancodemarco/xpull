@@ -13,4 +13,10 @@ test.describe("Landing experience", () => {
     await expect(page.getByRole("button", { name: /sign in with github/i })).toBeEnabled();
     await expect(page.getByText(/analysis in progress/i)).toBeVisible();
   });
+
+  test("dashboard view surfaces the weekly recap", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: /story feed ready for/i })).toBeVisible();
+    await expect(page.getByText(/weekly progress check/i)).toBeVisible();
+  });
 });

@@ -31,7 +31,7 @@ export default function SignInPage() {
   const handleSignIn = useCallback(() => {
     if (loading) return;
     setLoading(true);
-    void signIn("github", { callbackUrl: "/" });
+    void signIn("github", { callbackUrl: "/dashboard" });
   }, [loading]);
 
   return (
