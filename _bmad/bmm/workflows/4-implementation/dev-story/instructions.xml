@@ -60,6 +60,9 @@
 
     <anchor id="github_setup" />
 
+    <!-- Immediately assign issue to current user to signal work has started -->
+    <action>Get current GitHub user (via get_me or gh api user) and assign issue #{story_issue_number} to them on {github_owner}/{github_repo}</action>
+
     <action>Parse issue body sections: Story, Acceptance Criteria, Tasks/Subtasks, Dev Notes, Dev Agent Record</action>
     <action>Load comprehensive context from Dev Notes section in the issue body</action>
     <action>Identify first incomplete task (unchecked [ ]) in Tasks/Subtasks</action>
@@ -73,11 +76,11 @@
   <step n="2" goal="GitHub setup: assign and create branch">
     <critical>🐙 SET UP THE GITHUB WORKFLOW — assign issue, create branch (PR created after first commit)</critical>
 
-    <!-- Get current user -->
+    <!-- Get current user (issue already assigned in Step 1, store username for branch/PR use) -->
     <action>Get current GitHub user (via get_me or gh api user)</action>
     <action>Store as {{github_username}}</action>
 
-    <!-- Assign issue to current user -->
+    <!-- Confirm issue assignment (idempotent — already assigned in Step 1) -->
     <action>Assign issue #{story_issue_number} to {{github_username}} on {github_owner}/{github_repo}</action>
 
     <!-- Update label to in-progress -->
