@@ -19,53 +19,62 @@ datasource db {
 model Post {
   id        Int      @id @default(autoincrement())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   createdBy   User   @relation(fields: [createdById], references: [id])
-  createdById String
+  createdById String @map("created_by_id")
 
   @@index([name])
+  @@map("posts")
 }
 
 // Necessary for Next auth
 model Account {
   id                       String  @id @default(cuid())
-  userId                   String
+  userId                   String  @map("user_id")
   type                     String
   provider                 String
-  providerAccountId        String
-  refresh_token            String? // @db.Text
-  access_token             String? // @db.Text
+  providerAccountId        String  @map("provider_account_id")
+  refresh_token            String?
+  access_token             String?
   expires_at               Int?
   token_type               String?
   scope                    String?
-  id_token                 String? // @db.Text
+  id_token                 String?
   session_state            String?
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   refresh_token_expires_in Int?
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model User {
   id              String           @id @default(cuid())
   name            String?
   email           String?          @unique
-  emailVerified   DateTime?
+  emailVerified   DateTime?        @map("email_verified")
   image           String?
   accounts        Account[]
   sessions        Session[]
   posts           Post[]
   repoPreferences RepoPreference[]
+  importJobs      ImportJob[]
+  repositories    Repository[]
+  gitEvents       GitEvent[]
+
+  @@map("users")
 }
 
 model VerificationToken {
@@ -74,20 +83,100 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 // Repository preferences persisted per-user. Each (userId, repoName) is unique.
 model RepoPreference {
   id        Int      @id @default(autoincrement())
-  userId    String
-  repoName  String
-  fullName  String
+  userId    String   @map("user_id")
+  repoName  String   @map("repo_name")
+  fullName  String   @map("full_name")
   allowed   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, repoName])
   @@index([userId])
+  @@map("repo_preferences")
+}
+
+enum ImportJobStatus {
+  pending
+  in_progress
+  completed
+  failed
+}
+
+enum GitEventType {
+  commit
+  pull_request
+  review
+}
+
+model ImportJob {
+  id             String          @id @default(cuid())
+  userId         String          @map("user_id")
+  status         ImportJobStatus @default(pending)
+  progress       Int             @default(0)
+  totalItems     Int?            @map("total_items")
+  processedItems Int             @default(0) @map("processed_items")
+  errorMessage   String?         @map("error_message")
+  errorDetails   Json?           @map("error_details")
+  startedAt      DateTime?       @map("started_at")
+  completedAt    DateTime?       @map("completed_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gitEvents GitEvent[]
+
+  @@index([userId], name: "idx_import_jobs_user_id")
+  @@map("import_jobs")
+}
+
+model Repository {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  externalId      String    @map("external_id")
+  ownerLogin      String    @map("owner_login")
+  isPrivate       Boolean   @map("is_private")
+  defaultBranch   String?   @map("default_branch")
+  primaryLanguage String?   @map("primary_language")
+  lastSyncedAt    DateTime? @map("last_synced_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gitEvents GitEvent[]
+
+  @@unique([userId, externalId], name: "uq_repositories_user_id_external_id")
+  @@index([userId], name: "idx_repositories_user_id")
+  @@map("repositories")
+}
+
+model GitEvent {
+  id           String       @id @default(cuid())
+  userId       String       @map("user_id")
+  repositoryId String       @map("repository_id")
+  importJobId  String?      @map("import_job_id")
+  externalId   String       @map("external_id")
+  eventType    GitEventType @map("event_type")
+  occurredAt   DateTime     @map("occurred_at")
+  linesAdded   Int          @map("lines_added")
+  linesRemoved Int          @map("lines_removed")
+  filesChanged Int          @map("files_changed")
+  languages    Json
+  metadata     Json
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  importJob  ImportJob? @relation(fields: [importJobId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, externalId], name: "uq_git_events_user_id_external_id")
+  @@index([userId, occurredAt], name: "idx_git_events_user_id_occurred_at")
+  @@map("git_events")
 }

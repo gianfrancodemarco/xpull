@@ -70,8 +70,8 @@
     <action if="issue body is empty or missing Dev Notes">HALT: "Story not enriched. Run create-story first to add dev context."</action>
   </step>
 
-  <step n="2" goal="GitHub setup: assign, branch, draft PR">
-    <critical>🐙 SET UP THE GITHUB WORKFLOW — assign issue, create branch, create draft PR</critical>
+  <step n="2" goal="GitHub setup: assign and create branch">
+    <critical>🐙 SET UP THE GITHUB WORKFLOW — assign issue, create branch (PR created after first commit)</critical>
 
     <!-- Get current user -->
     <action>Get current GitHub user (via get_me or gh api user)</action>
@@ -88,21 +88,13 @@
     <action>Create branch `story/{{story_key}}` from the default branch on {github_owner}/{github_repo}</action>
     <action>Checkout the branch locally: `git fetch origin &amp;&amp; git checkout story/{{story_key}}`</action>
 
-    <!-- Create draft PR -->
-    <action>Read the PR template from {pr_template}</action>
-    <action>Create a draft pull request on {github_owner}/{github_repo}:
-      - **Title:** Story {{story_key}}: {{story_title}}
-      - **Head branch:** story/{{story_key}}
-      - **Base branch:** default branch (usually main)
-      - **Body:** Use PR template, replacing #{issue_number} with #{story_issue_number}
-      - **Draft:** true
-    </action>
-    <action>Store {{pr_number}} for later use</action>
+    <!-- PR will be created in Step 7 after the first commit is pushed -->
+    <action>Set {{pr_number}} = null (draft PR created after first commit)</action>
 
     <output>🐙 **GitHub Workflow Ready**
       - Issue #{story_issue_number} assigned to @{{github_username}}
       - Branch: `story/{{story_key}}`
-      - Draft PR: #{pr_number}
+      - Draft PR: will be created after first commit
       - Status: in-progress
     </output>
 
@@ -195,6 +187,20 @@
     <action>Stage changes: `git add .`</action>
     <action>Commit with descriptive message referencing the story: `git commit -m "feat({{story_key}}): {task_description}"`</action>
     <action>Push to branch: `git push origin story/{{story_key}}`</action>
+
+    <!-- CREATE DRAFT PR (on first commit only) -->
+    <check if="{{pr_number}} is null (no draft PR yet)">
+      <action>Read the PR template from {pr_template}</action>
+      <action>Create a draft pull request on {github_owner}/{github_repo}:
+        - **Title:** Story {{story_key}}: {{story_title}}
+        - **Head branch:** story/{{story_key}}
+        - **Base branch:** default branch (usually main)
+        - **Body:** Use PR template, replacing #{issue_number} with #{story_issue_number}
+        - **Draft:** true
+      </action>
+      <action>Store {{pr_number}} for later use</action>
+      <output>🐙 Draft PR #{pr_number} created for story/{{story_key}}</output>
+    </check>
 
     <!-- UPDATE ISSUE BODY: mark task complete -->
     <check if="ALL validation gates pass">
