@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics']
+stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics', 'step-03-create-stories-epic-2']
 inputDocuments:
   - '_bmad-output/planning-artifacts/prd.md'
   - '_bmad-output/planning-artifacts/architecture.md'
@@ -216,6 +216,7 @@ Users can sign up with GitHub OAuth, access the platform, and manage their conne
 ### Epic 2: Git Data Ingestion Pipeline (GitHub Issue #4)
 Users have their real-world coding activity automatically imported and kept in sync, with privacy-safe data handling.
 **FRs covered:** FR3, FR4, FR5, FR6, FR7, FR9, FR39, FR40
+**Stories:** 2.1 (#20), 2.2 (#21 — blocked by #20), 2.3 (#22 — blocked by #20), 2.4 (#23 — blocked by #20, #21)
 
 ### Epic 3: Developer Progression Engine (GitHub Issue #5)
 Users can see their XP, level, league, badges, and titles calculated deterministically from their real Git activity.
