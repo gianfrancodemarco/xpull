@@ -7,6 +7,7 @@ import {
 import { successResponse, errorResponse } from "~/shared/lib/api-response";
 import { AppError, AppErrorCode } from "~/shared/lib/errors";
 import { createImportJobSchema } from "~/features/imports/schema";
+import { processImportJob } from "~/worker/jobs/import-history.job";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -40,6 +41,8 @@ export async function POST(request: Request) {
   }
 
   const job = await createImportJob(session.user.id);
+
+  void processImportJob(job.id).catch(console.error);
 
   return NextResponse.json(successResponse(job), { status: 201 });
 }

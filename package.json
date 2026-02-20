@@ -25,6 +25,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.8",
     "@mui/material-nextjs": "^7.3.8",
+    "@octokit/rest": "^22.0.1",
     "@prisma/client": "^6.6.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@t3-oss/env-nextjs": "^0.12.0",
