@@ -9,6 +9,10 @@ vi.mock("~/server/auth", () => ({
   auth: vi.fn(),
 }));
 
+vi.mock("~/worker/jobs/import-history.job", () => ({
+  processImportJob: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { POST, GET } from "./route";
 import { createImportJob, getImportJobsByUserId } from "~/server/data/repositories/importJobRepository";
 import { auth } from "~/server/auth";

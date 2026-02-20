@@ -38,3 +38,13 @@ export async function getRepositoriesByUserId(userId: string) {
     orderBy: { createdAt: "desc" },
   });
 }
+
+export async function updateRepositoryLastSyncedAt(
+  repositoryId: string,
+  lastSyncedAt: Date,
+) {
+  return db.repository.update({
+    where: { id: repositoryId },
+    data: { lastSyncedAt },
+  });
+}
