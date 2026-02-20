@@ -19,48 +19,52 @@ datasource db {
 model Post {
   id        Int      @id @default(autoincrement())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   createdBy   User   @relation(fields: [createdById], references: [id])
-  createdById String
+  createdById String @map("created_by_id")
 
   @@index([name])
+  @@map("posts")
 }
 
 // Necessary for Next auth
 model Account {
   id                       String  @id @default(cuid())
-  userId                   String
+  userId                   String  @map("user_id")
   type                     String
   provider                 String
-  providerAccountId        String
-  refresh_token            String? // @db.Text
-  access_token             String? // @db.Text
+  providerAccountId        String  @map("provider_account_id")
+  refresh_token            String?
+  access_token             String?
   expires_at               Int?
   token_type               String?
   scope                    String?
-  id_token                 String? // @db.Text
+  id_token                 String?
   session_state            String?
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   refresh_token_expires_in Int?
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model User {
   id              String           @id @default(cuid())
   name            String?
   email           String?          @unique
-  emailVerified   DateTime?
+  emailVerified   DateTime?        @map("email_verified")
   image           String?
   accounts        Account[]
   sessions        Session[]
@@ -69,6 +73,8 @@ model User {
   importJobs      ImportJob[]
   repositories    Repository[]
   gitEvents       GitEvent[]
+
+  @@map("users")
 }
 
 model VerificationToken {
@@ -77,22 +83,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 // Repository preferences persisted per-user. Each (userId, repoName) is unique.
 model RepoPreference {
   id        Int      @id @default(autoincrement())
-  userId    String
-  repoName  String
-  fullName  String
+  userId    String   @map("user_id")
+  repoName  String   @map("repo_name")
+  fullName  String   @map("full_name")
   allowed   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, repoName])
   @@index([userId])
+  @@map("repo_preferences")
 }
 
 enum ImportJobStatus {
