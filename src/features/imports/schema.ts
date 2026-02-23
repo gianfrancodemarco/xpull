@@ -18,5 +18,20 @@ export const importJobResponseSchema = z.object({
 
 export const importJobListResponseSchema = z.array(importJobResponseSchema);
 
+export const importStatsResponseSchema = z.object({
+  totalCommits: z.number().int().min(0),
+  totalPullRequests: z.number().int().min(0),
+  totalReviews: z.number().int().min(0),
+  languages: z.array(
+    z.object({
+      language: z.string(),
+      count: z.number().int().min(0),
+    }),
+  ),
+  earliestEventDate: z.string().datetime().nullable(),
+  latestEventDate: z.string().datetime().nullable(),
+});
+
 export type CreateImportJobInput = z.infer<typeof createImportJobSchema>;
 export type ImportJobResponse = z.infer<typeof importJobResponseSchema>;
+export type ImportStatsResponse = z.infer<typeof importStatsResponseSchema>;
