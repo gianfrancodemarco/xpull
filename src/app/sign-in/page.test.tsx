@@ -21,13 +21,13 @@ describe("Sign-in page", () => {
 
   it("renders the sign-in button and status text", () => {
     render(<SignInPage />);
-    expect(screen.getByRole("button", { name: /sign in with github/i })).toBeInTheDocument();
-    expect(screen.getByText(/analysis in progress/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /continue with github/i })).toBeInTheDocument();
+    expect(screen.getByText(/skill tree/i)).toBeInTheDocument();
   });
 
   it("calls signIn when the button is clicked", () => {
     render(<SignInPage />);
-    const button = screen.getByRole("button", { name: /sign in with github/i });
+    const button = screen.getByRole("button", { name: /continue with github/i });
     fireEvent.click(button);
     expect(mockedSignIn).toHaveBeenCalledWith("github", { callbackUrl: "/onboarding" });
   });

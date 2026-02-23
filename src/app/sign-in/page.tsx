@@ -37,11 +37,11 @@ export default function SignInPage() {
   return (
     <main className={styles.main} style={themeVars}>
       <section className={styles.card}>
-        <p className={styles.badge}>GitHub OAuth</p>
-        <h1 className={styles.title}>Sign in and start the Unboxing</h1>
+        <p className={styles.badge}>Get started</p>
+        <h1 className={styles.title}>Your code tells a story — let's light it up</h1>
         <p className={styles.description}>
-          Authorize xpull to read your GitHub history. We immediately revoke the OAuth session when you disconnect and keep a typed
-          response envelope with an <code>x-xpull-correlation-id</code> for every analysis job.
+          Connect your GitHub account and we'll turn every commit, review, and merged PR
+          into a living map of your skills. It only takes a few seconds to get started.
         </p>
         <button
           className={styles.primaryButton}
@@ -50,11 +50,11 @@ export default function SignInPage() {
           disabled={loading}
           aria-busy={loading}
         >
-          {loading ? "Preparing analysis..." : "Sign in with GitHub"}
+          {loading ? "Connecting..." : "Continue with GitHub"}
         </button>
         <p className={styles.status}>
-          Once the OAuth handshake completes, the dashboard shows "analysis in progress" while we replay your commits, unlock levels,
-          and highlight skill tree updates — all in plain language.
+          We'll scan your contribution history, build your skill tree, and show you
+          what you've been quietly mastering all along.
         </p>
         <div className={styles.footer}>
           <span className={styles.footerText}>Need to review the landing story again?</span>
