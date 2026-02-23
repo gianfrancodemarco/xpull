@@ -1,8 +1,17 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { Typography, Divider, Stack, Box } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
 import RepositoryAccessList from "~/features/auth/components/RepositoryAccessList";
 import { ImportDashboard } from "~/features/imports/components/ImportDashboard";
+import { tokens } from "~/shared/ui/theme/tokens";
 
 type Repo = { id: string; name: string; full_name: string; allowed: boolean };
 
@@ -58,28 +67,62 @@ export default function SettingsPage() {
   }
 
   return (
-    <Box component="main" sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box component="main" sx={{ p: { xs: 2, sm: 3 }, maxWidth: 800, mx: "auto" }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        sx={{ fontFamily: tokens.typography.heading, fontWeight: 700, mb: 3 }}
+      >
         Settings
       </Typography>
 
-      <Stack spacing={4}>
-        <Box>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Data Import
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <ImportDashboard />
-        </Box>
+      <Stack spacing={3}>
+        <Card>
+          <CardHeader title="Data Import" />
+          <CardContent>
+            <ImportDashboard />
+          </CardContent>
+        </Card>
 
-        <Box>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Repository Access
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          {loading ? <div>Loading...</div> : null}
-          <RepositoryAccessList repos={repos} onToggle={handleToggle} onDisconnect={handleDisconnect} />
-        </Box>
+        <Card>
+          <CardHeader title="Repository Access" />
+          <CardContent>
+            {loading ? (
+              <Typography variant="body2" color="text.secondary">
+                Loading...
+              </Typography>
+            ) : (
+              <RepositoryAccessList
+                repos={repos}
+                onToggle={handleToggle}
+                onDisconnect={handleDisconnect}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card sx={{ border: `1px solid rgba(255, 107, 107, 0.2)` }}>
+          <CardHeader title="Account" />
+          <CardContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Disconnecting will remove your GitHub connection and all imported data.
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={handleDisconnect}
+              sx={{
+                color: tokens.colors.coralRed,
+                borderColor: tokens.colors.coralRed,
+                "&:hover": {
+                  borderColor: tokens.colors.coralRed,
+                  backgroundColor: "rgba(255, 107, 107, 0.08)",
+                },
+              }}
+            >
+              Disconnect GitHub
+            </Button>
+          </CardContent>
+        </Card>
       </Stack>
     </Box>
   );

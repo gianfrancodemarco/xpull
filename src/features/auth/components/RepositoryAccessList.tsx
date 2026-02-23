@@ -1,5 +1,12 @@
 "use client";
+
 import React from "react";
+import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Typography from "@mui/material/Typography";
 
 type Repo = {
   id: string;
@@ -11,54 +18,52 @@ type Repo = {
 export default function RepositoryAccessList({
   repos,
   onToggle,
-  onDisconnect,
 }: {
   repos: Repo[];
   onToggle: (repoName: string, allow: boolean) => Promise<void>;
   onDisconnect: () => Promise<void>;
 }) {
+  if (repos.length === 0) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        No repositories found. Connect your GitHub account to see repositories.
+      </Typography>
+    );
+  }
+
   return (
-    <div>
-      <h2>Repository Access</h2>
-      <p>Toggle repository access for xpull.</p>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+    <Box>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Toggle repository access for xpull.
+      </Typography>
+      <List disablePadding>
         {repos.map((r) => (
-          <li
+          <ListItem
             key={r.id}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "8px 0",
-              borderBottom: "1px solid #eee",
+            disablePadding
+            secondaryAction={
+              <Checkbox
+                edge="end"
+                checked={r.allowed}
+                onChange={(e) => onToggle(r.name, e.target.checked)}
+                inputProps={{ "aria-label": `Toggle ${r.full_name}` }}
+              />
+            }
+            sx={{
+              py: 1,
+              borderBottom: "1px solid",
+              borderColor: "divider",
             }}
           >
-            <div>
-              <div style={{ fontWeight: 600 }}>{r.full_name}</div>
-              <div style={{ fontSize: 12, color: "#666" }}>{r.name}</div>
-            </div>
-            <div>
-              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={r.allowed}
-                  onChange={(e) => onToggle(r.name, e.target.checked)}
-                />
-                <span style={{ fontSize: 14 }}>Allowed</span>
-              </label>
-            </div>
-          </li>
+            <ListItemText
+              primary={r.full_name}
+              secondary={r.name}
+              primaryTypographyProps={{ fontWeight: 600, variant: "body2" }}
+              secondaryTypographyProps={{ variant: "caption" }}
+            />
+          </ListItem>
         ))}
-      </ul>
-
-      <div style={{ marginTop: 20 }}>
-        <button
-          onClick={() => onDisconnect()}
-          style={{ background: "#c62828", color: "white", padding: "8px 12px", border: "none", borderRadius: 6 }}
-        >
-          Disconnect GitHub
-        </button>
-      </div>
-    </div>
+      </List>
+    </Box>
   );
 }
