@@ -5,6 +5,7 @@ import { ImportSummary, ImportSummarySkeleton } from "./ImportSummary";
 import type { ImportStatsResponse } from "../schema";
 
 const fullStats: ImportStatsResponse = {
+  totalRepositories: 8,
   totalCommits: 1250,
   totalPullRequests: 180,
   totalReviews: 95,
@@ -18,6 +19,7 @@ const fullStats: ImportStatsResponse = {
 };
 
 const emptyStats: ImportStatsResponse = {
+  totalRepositories: 0,
   totalCommits: 0,
   totalPullRequests: 0,
   totalReviews: 0,

@@ -61,6 +61,7 @@ function createMockJob(overrides = {}) {
     progress: 0,
     totalItems: null,
     processedItems: 0,
+    selectedRepoIds: null,
     errorMessage: null,
     errorDetails: null,
     startedAt: null,

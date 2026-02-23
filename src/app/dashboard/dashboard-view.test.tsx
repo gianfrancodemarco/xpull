@@ -8,6 +8,7 @@ import importsReducer from "~/features/imports/importsSlice";
 import DashboardView from "./dashboard-view";
 
 const mockStats = {
+  totalRepositories: 12,
   totalCommits: 100,
   totalPullRequests: 25,
   totalReviews: 15,
@@ -115,6 +116,8 @@ describe("DashboardView", () => {
     });
 
     await waitFor(() => {
+      expect(screen.getByText("12")).toBeInTheDocument();
+      expect(screen.getByText("Repositories")).toBeInTheDocument();
       expect(screen.getByText("100")).toBeInTheDocument();
       expect(screen.getByText("Commits")).toBeInTheDocument();
       expect(screen.getByText("25")).toBeInTheDocument();
@@ -126,6 +129,7 @@ describe("DashboardView", () => {
 
   it("shows empty state with link to settings when no data", async () => {
     const emptyStats = {
+      totalRepositories: 0,
       totalCommits: 0,
       totalPullRequests: 0,
       totalReviews: 0,

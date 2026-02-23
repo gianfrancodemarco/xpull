@@ -34,7 +34,11 @@ import {
 } from "./ImportStatusCard";
 import { ImportSummary, ImportSummarySkeleton } from "./ImportSummary";
 
-export function ImportDashboard() {
+type ImportDashboardProps = {
+  selectedRepoIds?: string[];
+};
+
+export function ImportDashboard({ selectedRepoIds }: ImportDashboardProps = {}) {
   const dispatch = useAppDispatch();
   const jobs = useAppSelector(selectImportJobs);
   const latestJob = useAppSelector(selectLatestImportJob);
@@ -55,11 +59,16 @@ export function ImportDashboard() {
   const hasCompletedImport = jobs.some((j) => j.status === "completed");
   const pastJobs = jobs.filter((j) => j !== latestJob);
 
-  const isButtonDisabled = isImportActive || isStarting;
+  const selectionCount = selectedRepoIds?.length ?? 0;
+  const isButtonDisabled = isImportActive || isStarting || selectionCount === 0;
 
   const handleStartImport = () => {
-    void dispatch(startImportJob());
+    void dispatch(startImportJob(selectedRepoIds));
   };
+
+  const buttonLabel = selectionCount > 0
+    ? `Import ${selectionCount} ${selectionCount === 1 ? "Repository" : "Repositories"}`
+    : "Select repositories to import";
 
   const startButton = (
     <Button
@@ -72,14 +81,20 @@ export function ImportDashboard() {
       {isStarting ? (
         <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
       ) : null}
-      Start Import
+      {buttonLabel}
     </Button>
   );
 
+  const tooltipTitle = isImportActive
+    ? "An import is already running"
+    : selectionCount === 0
+      ? "Select at least one repository above"
+      : "";
+
   return (
     <Stack spacing={3}>
-      {isImportActive && !isStarting ? (
-        <Tooltip title="An import is already running">
+      {tooltipTitle ? (
+        <Tooltip title={tooltipTitle}>
           <span>{startButton}</span>
         </Tooltip>
       ) : (
@@ -98,7 +113,7 @@ export function ImportDashboard() {
         <ImportStatusCard job={latestJob} />
       ) : (
         <Typography variant="body2" color="text.secondary">
-          No import jobs found. Start an import from the GitHub settings.
+          No import jobs yet.
         </Typography>
       )}
 

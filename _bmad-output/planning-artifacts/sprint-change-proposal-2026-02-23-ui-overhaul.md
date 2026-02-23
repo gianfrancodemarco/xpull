@@ -63,7 +63,7 @@ As an authenticated developer, I want a polished, cohesive UI across all authent
 
 2. **Dashboard redesign:** Remove all hardcoded placeholder data. Replace with properly designed layout: identity hero area (user avatar, name, level placeholder), "What Changed" panel structure (empty state or coming-soon), feed-style milestone card placeholders (well-designed empty/teaser states rather than fake data), and a collected-data section showing real import stats (already implemented). Clear visual hierarchy following progression-first principle.
 
-3. **Settings redesign:** Card-based layout with clear section headers. Data Import section with ImportDashboard in a styled card. Repository Access section in a styled card. Account/danger zone section for disconnect. Consistent spacing using 8px grid. All components use MUI theme tokens.
+3. **Settings redesign:** Card-based layout with clear section headers. Unified "Repositories & Import" card combining repo selection (with last import time per repo) and ImportDashboard (import button disabled until repos selected, job status, history). Account/danger zone section for disconnect. Consistent spacing using 8px grid. All components use MUI theme tokens. *(Partially implemented via Story 2.5 — settings page now uses unified card layout with `RepoSelectionCard` + `ImportDashboard`)*
 
 4. **Feed page (mocked):** New `/feed` route accessible from navbar. Shows the Story Feed vision with placeholder StoryMilestoneCard-style components. "What Changed" panel mockup. "Next Action" module mockup. Coming-soon state for sections that need real data. This gives the design direction concrete shape.
 

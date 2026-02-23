@@ -41,6 +41,8 @@ const mockStats = {
   latestEventDate: "2026-02-01T00:00:00.000Z",
 };
 
+const selectedRepos = ["user/repo-a", "user/repo-b"];
+
 function setupFetchMock(jobs: unknown[] = [], stats: unknown = mockStats) {
   vi.stubGlobal(
     "fetch",
@@ -101,7 +103,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -117,13 +119,13 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/No import jobs found/)).toBeInTheDocument();
+      expect(screen.getByText(/No import jobs yet/)).toBeInTheDocument();
     });
   });
 
@@ -134,7 +136,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -152,7 +154,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -170,7 +172,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -189,7 +191,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -206,7 +208,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -237,7 +239,7 @@ describe("ImportDashboard", () => {
     await act(async () => {
       render(
         <Provider store={store}>
-          <ImportDashboard />
+          <ImportDashboard selectedRepoIds={selectedRepos} />
         </Provider>,
       );
     });
@@ -247,30 +249,47 @@ describe("ImportDashboard", () => {
     });
   });
 
-  describe("Start Import button", () => {
-    it("renders Start Import button", async () => {
+  describe("Import button", () => {
+    it("renders import button with repo count", async () => {
       setupFetchMock([]);
       const store = createStore();
 
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
 
       expect(screen.getByRole("button", { name: /start historical data import/i })).toBeInTheDocument();
+      expect(screen.getByText(/Import 2 Repositories/)).toBeInTheDocument();
     });
 
-    it("button is enabled when no active import", async () => {
+    it("button is disabled when no repos are selected", async () => {
+      setupFetchMock([]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard selectedRepoIds={[]} />
+          </Provider>,
+        );
+      });
+
+      const button = screen.getByRole("button", { name: /start historical data import/i });
+      expect(button).toBeDisabled();
+    });
+
+    it("button is enabled when repos are selected and no active import", async () => {
       setupFetchMock([completedJob]);
       const store = createStore();
 
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -288,7 +307,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -306,7 +325,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -319,14 +338,14 @@ describe("ImportDashboard", () => {
       expect(wrapper).toBeInTheDocument();
     });
 
-    it("dispatches startImportJob on click", async () => {
+    it("sends selectedRepoIds when starting import", async () => {
       setupFetchMock([]);
       const store = createStore();
 
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -337,7 +356,11 @@ describe("ImportDashboard", () => {
         fireEvent.click(button);
       });
 
-      expect(fetch).toHaveBeenCalledWith("/api/imports", { method: "POST" });
+      expect(fetch).toHaveBeenCalledWith("/api/imports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedRepoIds: selectedRepos }),
+      });
     });
 
     it("shows CircularProgress spinner while isStarting is true", async () => {
@@ -347,7 +370,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -362,7 +385,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -398,7 +421,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });
@@ -421,7 +444,7 @@ describe("ImportDashboard", () => {
       await act(async () => {
         render(
           <Provider store={store}>
-            <ImportDashboard />
+            <ImportDashboard selectedRepoIds={selectedRepos} />
           </Provider>,
         );
       });

@@ -53,8 +53,14 @@ export const retryImportJob = createAsyncThunk(
 
 export const startImportJob = createAsyncThunk(
   "imports/startJob",
-  async (_, { dispatch }) => {
-    const res = await fetch("/api/imports", { method: "POST" });
+  async (selectedRepoIds: string[] | undefined, { dispatch }) => {
+    const res = await fetch("/api/imports", {
+      method: "POST",
+      ...(selectedRepoIds && {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedRepoIds }),
+      }),
+    });
     if (!res.ok) throw new Error("Failed to start import");
     const body = await res.json();
     void dispatch(fetchImportJobs());
