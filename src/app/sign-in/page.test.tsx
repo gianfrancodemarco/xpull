@@ -29,6 +29,6 @@ describe("Sign-in page", () => {
     render(<SignInPage />);
     const button = screen.getByRole("button", { name: /sign in with github/i });
     fireEvent.click(button);
-    expect(mockedSignIn).toHaveBeenCalledWith("github", { callbackUrl: "/dashboard" });
+    expect(mockedSignIn).toHaveBeenCalledWith("github", { callbackUrl: "/onboarding" });
   });
 });
