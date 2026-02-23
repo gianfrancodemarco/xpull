@@ -48,12 +48,22 @@ export async function updateImportJobProgress(
   id: string,
   processedItems: number,
   totalItems: number,
+  currentRepository?: string,
 ) {
   const progress =
     totalItems > 0 ? Math.round((processedItems / totalItems) * 100) : 0;
 
   return db.importJob.update({
     where: { id },
-    data: { processedItems, totalItems, progress },
+    data: {
+      processedItems,
+      totalItems,
+      progress,
+      ...(currentRepository !== undefined && {
+        errorDetails: { currentRepository } as Parameters<
+          typeof db.importJob.update
+        >[0]["data"]["errorDetails"],
+      }),
+    },
   });
 }

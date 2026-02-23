@@ -67,6 +67,20 @@ describe("ImportStatusCard", () => {
     expect(screen.getByText("45% complete")).toBeInTheDocument();
   });
 
+  it("shows current repository being scanned during in_progress", () => {
+    const inProgressJob = {
+      ...baseJob,
+      status: "in_progress" as const,
+      progress: 30,
+      processedItems: 3,
+      completedAt: null,
+      errorDetails: { currentRepository: "owner/my-repo" },
+    };
+    renderWithStore(<ImportStatusCard job={inProgressJob} />);
+
+    expect(screen.getByText(/scanning owner\/my-repo/)).toBeInTheDocument();
+  });
+
   it("renders failed status with error message and retry button", () => {
     const failedJob = {
       ...baseJob,
@@ -110,17 +124,17 @@ describe("ImportStatusCard", () => {
     expect(fetch).toHaveBeenCalledWith("/api/imports/job-1/retry", { method: "POST" });
   });
 
-  it("displays item counts", () => {
+  it("displays repository counts", () => {
     renderWithStore(<ImportStatusCard job={baseJob} />);
 
-    expect(screen.getByText("Items: 50 / 50 processed")).toBeInTheDocument();
+    expect(screen.getByText("Repositories: 50 / 50 processed")).toBeInTheDocument();
   });
 
-  it("displays item counts without total when null", () => {
+  it("displays repository counts without total when null", () => {
     const noTotalJob = { ...baseJob, totalItems: null };
     renderWithStore(<ImportStatusCard job={noTotalJob} />);
 
-    expect(screen.getByText("Items: 50 processed")).toBeInTheDocument();
+    expect(screen.getByText("Repositories: 50 processed")).toBeInTheDocument();
   });
 
   it("has accessible status chip with aria-label", () => {

@@ -100,6 +100,7 @@ describe("processImportJob", () => {
     mockFetchRepos.mockResolvedValue([
       {
         externalId: "123",
+        name: "my-repo",
         ownerLogin: "owner",
         isPrivate: false,
         defaultBranch: "main",
@@ -137,7 +138,7 @@ describe("processImportJob", () => {
 
     expect(mockUpdateStatus).toHaveBeenCalledWith("job-1", "in_progress");
     expect(mockCreateEvents).toHaveBeenCalled();
-    expect(mockUpdateStatus).toHaveBeenCalledWith("job-1", "completed");
+    expect(mockUpdateStatus).toHaveBeenCalledWith("job-1", "completed", { errorDetails: null });
   });
 
   it("throws when job not found", async () => {
@@ -179,7 +180,7 @@ describe("processImportJob", () => {
 
     await processImportJob("job-1");
 
-    expect(mockUpdateStatus).toHaveBeenCalledWith("job-1", "completed");
+    expect(mockUpdateStatus).toHaveBeenCalledWith("job-1", "completed", { errorDetails: null });
   });
 
   it("rejects retry when max attempts exceeded", async () => {
@@ -198,7 +199,7 @@ describe("processImportJob", () => {
   it("deduplicates events using gitEventExists", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "123", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "123", name: "my-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue({
       id: "repo-1", userId: "user-1", externalId: "123", ownerLogin: "owner",
@@ -224,7 +225,7 @@ describe("processImportJob", () => {
   it("stores only privacy-safe metadata for commits", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "123", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "123", name: "my-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue({
       id: "repo-1", userId: "user-1", externalId: "123", ownerLogin: "owner",
@@ -249,8 +250,8 @@ describe("processImportJob", () => {
   it("updates progress after processing each repository", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "1", ownerLogin: "o", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
-      { externalId: "2", ownerLogin: "o", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "1", name: "repo-a", ownerLogin: "o", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "2", name: "repo-b", ownerLogin: "o", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo
       .mockResolvedValueOnce({ id: "r1", userId: "user-1", externalId: "1", ownerLogin: "o", isPrivate: false, defaultBranch: "main", primaryLanguage: null, lastSyncedAt: null, createdAt: new Date(), updatedAt: new Date() })
@@ -271,7 +272,7 @@ describe("processImportJob", () => {
       createMockJob({ status: "failed", errorDetails: { attempts: 1, lastError: "timeout" } }),
     );
     mockFetchRepos.mockResolvedValue([
-      { externalId: "123", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "123", name: "my-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue({
       id: "repo-1", userId: "user-1", externalId: "123", ownerLogin: "owner",
@@ -284,10 +285,10 @@ describe("processImportJob", () => {
     await processImportJob("job-1");
 
     expect(mockFetchCommits).toHaveBeenCalledWith(
-      expect.anything(), "owner", "123", expect.anything(), lastSync,
+      expect.anything(), "owner", "my-repo", expect.anything(), lastSync,
     );
     expect(mockFetchPRs).toHaveBeenCalledWith(
-      expect.anything(), "owner", "123", expect.anything(), lastSync,
+      expect.anything(), "owner", "my-repo", expect.anything(), lastSync,
     );
   });
 });

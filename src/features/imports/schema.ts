@@ -10,6 +10,10 @@ export const importJobResponseSchema = z.object({
   totalItems: z.number().int().nullable(),
   processedItems: z.number().int(),
   errorMessage: z.string().nullable(),
+  errorDetails: z
+    .object({ currentRepository: z.string().optional() })
+    .nullable()
+    .optional(),
   startedAt: z.string().datetime().nullable(),
   completedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),

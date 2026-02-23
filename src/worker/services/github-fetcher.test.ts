@@ -65,6 +65,7 @@ describe("fetchUserRepositories", () => {
     const mockRepos = [
       {
         id: 123,
+        name: "my-repo",
         owner: { login: "testuser" },
         private: false,
         default_branch: "main",
@@ -72,6 +73,7 @@ describe("fetchUserRepositories", () => {
       },
       {
         id: 456,
+        name: "other-repo",
         owner: { login: "testuser" },
         private: true,
         default_branch: "develop",
@@ -87,6 +89,7 @@ describe("fetchUserRepositories", () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
       externalId: "123",
+      name: "my-repo",
       ownerLogin: "testuser",
       isPrivate: false,
       defaultBranch: "main",
@@ -94,6 +97,7 @@ describe("fetchUserRepositories", () => {
     });
     expect(result[1]).toEqual({
       externalId: "456",
+      name: "other-repo",
       ownerLogin: "testuser",
       isPrivate: true,
       defaultBranch: "develop",

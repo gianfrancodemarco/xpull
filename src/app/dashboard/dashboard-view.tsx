@@ -1,9 +1,13 @@
 "use client";
 
+import React, { useEffect } from "react";
 import Link from "next/link";
 
 import styles from "./dashboard-view.module.css";
 import { tokens } from "~/shared/ui/theme/tokens";
+import { useAppDispatch, useAppSelector } from "~/shared/lib/store";
+import { fetchImportStats } from "~/features/imports/importsSlice";
+import { selectImportStats } from "~/features/imports/selectors";
 
 type DashboardViewProps = {
   userName: string;
@@ -41,25 +45,40 @@ const nextActions = [
   },
 ];
 
-const collectedInfo = [
-  {
-    label: "Collected info",
-    value: "18,594 commits",
-    detail: "Historical data imported from GitHub + relevant tags.",
-  },
-  {
-    label: "Repos synced",
-    value: "47 repos",
-    detail: "Each repo keeps XP, league, and badge history in sync.",
-  },
-  {
-    label: "Signals tracked",
-    value: "12 badges",
-    detail: "Badge progress recorded with correlation IDs for observability.",
-  },
-];
-
 export default function DashboardView({ userName, userEmail, userAvatar }: DashboardViewProps) {
+  const dispatch = useAppDispatch();
+  const importStats = useAppSelector(selectImportStats);
+
+  useEffect(() => {
+    void dispatch(fetchImportStats());
+  }, [dispatch]);
+
+  const hasData = importStats && (importStats.totalCommits > 0 || importStats.totalPullRequests > 0 || importStats.totalReviews > 0);
+
+  const topLanguage = importStats?.languages?.[0];
+
+  const collectedInfo = hasData
+    ? [
+        {
+          label: "Commits",
+          value: importStats.totalCommits.toLocaleString(),
+          detail: "Historical commits imported from GitHub.",
+        },
+        {
+          label: "Pull Requests",
+          value: importStats.totalPullRequests.toLocaleString(),
+          detail: "Merged pull requests tracked across your repos.",
+        },
+        {
+          label: "Reviews",
+          value: importStats.totalReviews.toLocaleString(),
+          detail: topLanguage
+            ? `Top language: ${topLanguage.language} (${topLanguage.count.toLocaleString()} events).`
+            : "Code reviews tracked for contribution insights.",
+        },
+      ]
+    : null;
+
   return (
     <main className={styles.main} style={{ color: tokens.colors.textPrimary }}>
       <section className={styles.hero}>
@@ -123,13 +142,25 @@ export default function DashboardView({ userName, userEmail, userAvatar }: Dashb
         ))}
       </section>
       <section className={styles.collected}>
-        {collectedInfo.map((info) => (
-          <article key={info.label} className={styles.collectedCard}>
-            <p className={styles.collectedLabel}>{info.label}</p>
-            <p className={styles.collectedValue}>{info.value}</p>
-            <p className={styles.collectedDetail}>{info.detail}</p>
+        {collectedInfo ? (
+          collectedInfo.map((info) => (
+            <article key={info.label} className={styles.collectedCard}>
+              <p className={styles.collectedLabel}>{info.label}</p>
+              <p className={styles.collectedValue}>{info.value}</p>
+              <p className={styles.collectedDetail}>{info.detail}</p>
+            </article>
+          ))
+        ) : (
+          <article className={styles.collectedCard}>
+            <p className={styles.collectedLabel}>No data yet</p>
+            <p className={styles.collectedDetail}>
+              Import your GitHub history to see your activity here.
+            </p>
+            <Link className={styles.ctaButton} href="/settings">
+              Go to Settings &amp; Import
+            </Link>
           </article>
-        ))}
+        )}
       </section>
     </main>
   );

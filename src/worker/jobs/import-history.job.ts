@@ -60,27 +60,28 @@ export async function processImportJob(jobId: string): Promise<void> {
     const totalRepos = repos.length;
     let processedRepos = 0;
 
-    const repoRecords: Array<{ id: string; ownerLogin: string; externalId: string; lastSyncedAt: Date | null }> = [];
+    const repoRecords: Array<{ id: string; ownerLogin: string; name: string; externalId: string; lastSyncedAt: Date | null }> = [];
     for (const repo of repos) {
-      const record = await upsertRepository(job.userId, repo);
+      const { name: _name, ...repoData } = repo;
+      const record = await upsertRepository(job.userId, repoData);
       repoRecords.push({
         id: record.id,
         ownerLogin: repo.ownerLogin,
+        name: repo.name,
         externalId: repo.externalId,
         lastSyncedAt: record.lastSyncedAt,
       });
     }
 
-    // Estimate total items for progress (rough: repos * avg items)
     await updateImportJobProgress(jobId, 0, totalRepos);
 
-    // Phase 2 & 3: Fetch commits, PRs, and reviews per repo
     for (const repo of repoRecords) {
+      await updateImportJobProgress(jobId, processedRepos, totalRepos, `${repo.ownerLogin}/${repo.name}`);
       const sinceDate = repo.lastSyncedAt ?? undefined;
 
       // Fetch commits
       const commits = await fetchRepositoryCommits(
-        octokit, repo.ownerLogin, repo.externalId, rateLimiter, sinceDate,
+        octokit, repo.ownerLogin, repo.name, rateLimiter, sinceDate,
       );
 
       const commitEvents: Parameters<typeof createGitEvents>[0] = [];
@@ -111,7 +112,7 @@ export async function processImportJob(jobId: string): Promise<void> {
 
       // Fetch PRs
       const prs = await fetchRepositoryPullRequests(
-        octokit, repo.ownerLogin, repo.externalId, rateLimiter, sinceDate,
+        octokit, repo.ownerLogin, repo.name, rateLimiter, sinceDate,
       );
 
       const prEvents: Parameters<typeof createGitEvents>[0] = [];
@@ -135,7 +136,7 @@ export async function processImportJob(jobId: string): Promise<void> {
 
         // Fetch reviews for this PR
         const reviews = await fetchPullRequestReviews(
-          octokit, repo.ownerLogin, repo.externalId, pr.number, rateLimiter,
+          octokit, repo.ownerLogin, repo.name, pr.number, rateLimiter,
         );
 
         for (const review of reviews) {
@@ -171,7 +172,7 @@ export async function processImportJob(jobId: string): Promise<void> {
       await updateImportJobProgress(jobId, processedRepos, totalRepos);
     }
 
-    await updateImportJobStatus(jobId, "completed");
+    await updateImportJobStatus(jobId, "completed", { errorDetails: null });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     await updateImportJobStatus(jobId, "failed", {

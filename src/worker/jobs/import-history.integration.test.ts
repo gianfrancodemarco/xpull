@@ -101,8 +101,8 @@ describe("Import History Integration Tests", () => {
   it("multi-repo import: processes commits, PRs, and reviews across multiple repos", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "1001", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: "TypeScript" },
-      { externalId: "1002", ownerLogin: "owner", isPrivate: true, defaultBranch: "develop", primaryLanguage: "Python" },
+      { externalId: "1001", name: "repo-ts", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: "TypeScript" },
+      { externalId: "1002", name: "repo-py", ownerLogin: "owner", isPrivate: true, defaultBranch: "develop", primaryLanguage: "Python" },
     ]);
     mockUpsertRepo
       .mockResolvedValueOnce(makeRepo("r1", 0))
@@ -143,14 +143,13 @@ describe("Import History Integration Tests", () => {
     expect(prEvents).toHaveLength(1);
     expect(reviewEvents).toHaveLength(1);
 
-    // Verify completion
-    expect(mockUpdateStatus).toHaveBeenCalledWith("job-int-1", "completed");
+    expect(mockUpdateStatus).toHaveBeenCalledWith("job-int-1", "completed", { errorDetails: null });
   });
 
   it("deduplication: skips already-existing events during import", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "2001", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "2001", name: "dedup-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue(makeRepo("dup", 0));
     mockFetchCommits.mockResolvedValue([
@@ -175,7 +174,7 @@ describe("Import History Integration Tests", () => {
   it("rate limit pause/resume: worker pauses when rate limit threshold reached", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "3001", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "3001", name: "rate-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue(makeRepo("rate", 0));
     mockFetchCommits.mockResolvedValue([]);
@@ -183,16 +182,15 @@ describe("Import History Integration Tests", () => {
 
     await processImportJob("job-int-1");
 
-    // The rate limiter is mocked — it's injected into every fetcher call
     expect(mockFetchCommits).toHaveBeenCalledWith(
-      expect.anything(), "owner", "3001", expect.anything(), undefined,
+      expect.anything(), "owner", "rate-repo", expect.anything(), undefined,
     );
   });
 
   it("language detection: commits include language data", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "4001", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: "TypeScript" },
+      { externalId: "4001", name: "lang-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: "TypeScript" },
     ]);
     mockUpsertRepo.mockResolvedValue(makeRepo("lang", 0));
     mockFetchCommits.mockResolvedValue([
@@ -253,13 +251,13 @@ describe("Import History Integration Tests", () => {
 
     await processImportJob("job-int-1");
 
-    expect(mockUpdateStatus).toHaveBeenCalledWith("job-int-1", "completed");
+    expect(mockUpdateStatus).toHaveBeenCalledWith("job-int-1", "completed", { errorDetails: null });
   });
 
   it("privacy: no event metadata contains sensitive data", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "5001", ownerLogin: "secretowner", isPrivate: true, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "5001", name: "secret-repo", ownerLogin: "secretowner", isPrivate: true, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue(makeRepo("priv", 0));
     mockFetchCommits.mockResolvedValue([
@@ -298,7 +296,7 @@ describe("Import History Integration Tests", () => {
   it("batch insert: uses batches of 100 for performance", async () => {
     mockGetJob.mockResolvedValue(createMockJob());
     mockFetchRepos.mockResolvedValue([
-      { externalId: "6001", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
+      { externalId: "6001", name: "batch-repo", ownerLogin: "owner", isPrivate: false, defaultBranch: "main", primaryLanguage: null },
     ]);
     mockUpsertRepo.mockResolvedValue(makeRepo("batch", 0));
 
