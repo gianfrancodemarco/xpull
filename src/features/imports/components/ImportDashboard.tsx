@@ -8,15 +8,24 @@ import {
   AccordionSummary,
   AccordionDetails,
   Alert,
+  Button,
+  CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "~/shared/lib/store";
-import { fetchImportJobs, fetchImportStats } from "../importsSlice";
+import {
+  fetchImportJobs,
+  fetchImportStats,
+  startImportJob,
+} from "../importsSlice";
 import {
   selectImportJobs,
   selectLatestImportJob,
   selectImportStats,
   selectImportsLoading,
   selectImportsError,
+  selectIsImportInProgress,
+  selectIsStartingImport,
 } from "../selectors";
 import { useImportPolling } from "../hooks/useImportPolling";
 import {
@@ -32,6 +41,8 @@ export function ImportDashboard() {
   const stats = useAppSelector(selectImportStats);
   const isLoading = useAppSelector(selectImportsLoading);
   const error = useAppSelector(selectImportsError);
+  const isImportActive = useAppSelector(selectIsImportInProgress);
+  const isStarting = useAppSelector(selectIsStartingImport);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   useImportPolling();
@@ -44,8 +55,37 @@ export function ImportDashboard() {
   const hasCompletedImport = jobs.some((j) => j.status === "completed");
   const pastJobs = jobs.filter((j) => j !== latestJob);
 
+  const isButtonDisabled = isImportActive || isStarting;
+
+  const handleStartImport = () => {
+    void dispatch(startImportJob());
+  };
+
+  const startButton = (
+    <Button
+      variant="contained"
+      color="primary"
+      disabled={isButtonDisabled}
+      onClick={handleStartImport}
+      aria-label="Start historical data import"
+    >
+      {isStarting ? (
+        <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+      ) : null}
+      Start Import
+    </Button>
+  );
+
   return (
     <Stack spacing={3}>
+      {isImportActive && !isStarting ? (
+        <Tooltip title="An import is already running">
+          <span>{startButton}</span>
+        </Tooltip>
+      ) : (
+        startButton
+      )}
+
       {error && (
         <Alert severity="error" variant="outlined">
           {error}

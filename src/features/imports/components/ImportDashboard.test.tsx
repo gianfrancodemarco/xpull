@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act, waitFor } from "@testing-library/react";
+import { render, screen, act, waitFor, fireEvent } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import importsReducer from "../importsSlice";
+import type { ImportsState } from "../importsSlice";
 import { ImportDashboard } from "./ImportDashboard";
 
 const completedJob = {
@@ -64,9 +65,22 @@ function setupFetchMock(jobs: unknown[] = [], stats: unknown = mockStats) {
   );
 }
 
-function createStore() {
+function createStore(preloadedImports?: Partial<ImportsState>) {
   return configureStore({
     reducer: { imports: importsReducer },
+    preloadedState: preloadedImports
+      ? {
+          imports: {
+            jobs: [],
+            stats: null,
+            isLoading: false,
+            isPolling: false,
+            isStarting: false,
+            error: null,
+            ...preloadedImports,
+          },
+        }
+      : undefined,
   });
 }
 
@@ -230,6 +244,191 @@ describe("ImportDashboard", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Failed to fetch/)).toBeInTheDocument();
+    });
+  });
+
+  describe("Start Import button", () => {
+    it("renders Start Import button", async () => {
+      setupFetchMock([]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      expect(screen.getByRole("button", { name: /start historical data import/i })).toBeInTheDocument();
+    });
+
+    it("button is enabled when no active import", async () => {
+      setupFetchMock([completedJob]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      await waitFor(() => {
+        const button = screen.getByRole("button", { name: /start historical data import/i });
+        expect(button).not.toBeDisabled();
+      });
+    });
+
+    it("button is disabled when import is in progress", async () => {
+      setupFetchMock([inProgressJob]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      await waitFor(() => {
+        const button = screen.getByRole("button", { name: /start historical data import/i });
+        expect(button).toBeDisabled();
+      });
+    });
+
+    it("shows tooltip when button is disabled due to active import", async () => {
+      setupFetchMock([inProgressJob]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /start historical data import/i })).toBeDisabled();
+      });
+
+      const wrapper = screen.getByRole("button", { name: /start historical data import/i }).closest("span");
+      expect(wrapper).toBeInTheDocument();
+    });
+
+    it("dispatches startImportJob on click", async () => {
+      setupFetchMock([]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      const button = screen.getByRole("button", { name: /start historical data import/i });
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      expect(fetch).toHaveBeenCalledWith("/api/imports", { method: "POST" });
+    });
+
+    it("shows CircularProgress spinner while isStarting is true", async () => {
+      setupFetchMock([]);
+      const store = createStore({ isStarting: true });
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    });
+
+    it("does not show spinner when isStarting is false", async () => {
+      setupFetchMock([]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    });
+
+    it("displays error when start import fails", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+          if (url === "/api/imports" && options?.method === "POST") {
+            return Promise.resolve({ ok: false, status: 500 });
+          }
+          if (url === "/api/imports") {
+            return Promise.resolve({
+              ok: true,
+              json: () => Promise.resolve({ data: [] }),
+            });
+          }
+          if (url === "/api/imports/stats") {
+            return Promise.resolve({
+              ok: true,
+              json: () => Promise.resolve({ data: mockStats }),
+            });
+          }
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: {} }) });
+        }),
+      );
+
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      const button = screen.getByRole("button", { name: /start historical data import/i });
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to start import/)).toBeInTheDocument();
+      });
+    });
+
+    it("button has correct aria-label", async () => {
+      setupFetchMock([]);
+      const store = createStore();
+
+      await act(async () => {
+        render(
+          <Provider store={store}>
+            <ImportDashboard />
+          </Provider>,
+        );
+      });
+
+      const button = screen.getByLabelText("Start historical data import");
+      expect(button).toBeInTheDocument();
+      expect(button.tagName).toBe("BUTTON");
     });
   });
 });

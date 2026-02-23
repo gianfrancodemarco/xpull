@@ -3,6 +3,7 @@ import type { GitHubRateLimiter } from "~/server/lib/rate-limiter";
 
 export type NormalizedRepo = {
   externalId: string;
+  name: string;
   ownerLogin: string;
   isPrivate: boolean;
   defaultBranch: string | null;
@@ -77,6 +78,7 @@ export async function fetchUserRepositories(
 
   return repos.map((repo) => ({
     externalId: String(repo.id),
+    name: repo.name,
     ownerLogin: repo.owner?.login ?? "",
     isPrivate: repo.private,
     defaultBranch: repo.default_branch ?? null,

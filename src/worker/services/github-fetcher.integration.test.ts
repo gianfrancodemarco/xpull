@@ -49,6 +49,7 @@ describe("GitHub Fetcher Integration Tests", () => {
       const octokit = createMockOctokit();
       const allRepos = Array.from({ length: 250 }, (_, i) => ({
         id: i + 1,
+        name: `repo-${i + 1}`,
         owner: { login: "testuser" },
         private: i % 5 === 0,
         default_branch: "main",

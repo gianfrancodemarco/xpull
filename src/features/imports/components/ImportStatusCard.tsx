@@ -93,13 +93,16 @@ export function ImportStatusCard({ job }: ImportStatusCardProps) {
               />
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 {job.progress}% complete
+                {job.errorDetails?.currentRepository
+                  ? ` — scanning ${job.errorDetails.currentRepository}`
+                  : null}
               </Typography>
             </Box>
           )}
 
           <Stack direction="row" justifyContent="space-between" flexWrap="wrap" gap={1}>
             <Typography variant="body2" color="text.secondary">
-              Items: {job.processedItems}{job.totalItems != null ? ` / ${job.totalItems}` : ""} processed
+              Repositories: {job.processedItems}{job.totalItems != null ? ` / ${job.totalItems}` : ""} processed
             </Typography>
             <Stack direction="row" spacing={2}>
               {job.startedAt && (
