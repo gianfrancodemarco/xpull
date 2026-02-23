@@ -6,6 +6,7 @@ export const tokens = {
     success: "#32D583",
     warning: "#F5A524",
     error: "#FF5A7A",
+    coralRed: "#FF6B6B",
     background: "#0B1020",
     surface: "#121A2E",
     surfaceElevated: "#1A2440",
@@ -29,5 +30,15 @@ export const tokens = {
     md: 12,
     lg: 16,
     xl: 20,
+  },
+  elevation: {
+    low: "0 2px 8px rgba(0, 0, 0, 0.3)",
+    medium: "0 4px 16px rgba(0, 0, 0, 0.4)",
+    high: "0 8px 32px rgba(0, 0, 0, 0.5)",
+  },
+  motion: {
+    fast: "150ms ease",
+    normal: "250ms ease",
+    slow: "400ms ease",
   },
 };
