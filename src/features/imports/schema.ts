@@ -27,6 +27,7 @@ export const importJobResponseSchema = z.object({
 export const importJobListResponseSchema = z.array(importJobResponseSchema);
 
 export const importStatsResponseSchema = z.object({
+  totalRepositories: z.number().int().min(0),
   totalCommits: z.number().int().min(0),
   totalPullRequests: z.number().int().min(0),
   totalReviews: z.number().int().min(0),

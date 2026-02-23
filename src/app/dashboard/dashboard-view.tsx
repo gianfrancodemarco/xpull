@@ -39,6 +39,11 @@ export default function DashboardView({ userName, userEmail, userAvatar }: Dashb
   const collectedInfo = hasData
     ? [
         {
+          label: "Repositories",
+          value: (importStats.totalRepositories ?? 0).toLocaleString(),
+          detail: "GitHub repositories imported and tracked.",
+        },
+        {
           label: "Commits",
           value: importStats.totalCommits.toLocaleString(),
           detail: "Historical commits imported from GitHub.",

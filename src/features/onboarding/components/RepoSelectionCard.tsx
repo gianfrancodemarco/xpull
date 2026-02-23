@@ -18,11 +18,11 @@ import Typography from "@mui/material/Typography";
 import type { RepoItem } from "../schema";
 import { formatRelativeTime } from "./repoFormatUtils";
 
-type RepoSelectionStepProps = {
-  onContinue: (selectedRepoIds: string[]) => void;
+type RepoSelectionCardProps = {
+  onSelectionChange?: (repoIds: string[]) => void;
 };
 
-export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
+export function RepoSelectionCard({ onSelectionChange }: RepoSelectionCardProps) {
   const [repos, setRepos] = useState<RepoItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -35,8 +35,7 @@ export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
       const res = await fetch("/api/repos");
       if (!res.ok) throw new Error("Failed to fetch repositories");
       const body = await res.json();
-      const data = body.data as RepoItem[];
-      setRepos(data);
+      setRepos(body.data as RepoItem[]);
     } catch {
       setError("Could not load your repositories. Please try again.");
     } finally {
@@ -48,35 +47,29 @@ export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
     void fetchRepos();
   }, [fetchRepos]);
 
-  const handleToggle = (repoName: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(repoName)) {
-        next.delete(repoName);
-      } else {
-        next.add(repoName);
-      }
-      return next;
-    });
+  const updateSelection = (next: Set<string>) => {
+    setSelected(next);
+    onSelectionChange?.(Array.from(next));
   };
 
-  const handleSelectAll = () => {
-    setSelected(new Set(repos.map((r) => r.fullName)));
+  const handleToggle = (repoFullName: string) => {
+    const next = new Set(selected);
+    if (next.has(repoFullName)) {
+      next.delete(repoFullName);
+    } else {
+      next.add(repoFullName);
+    }
+    updateSelection(next);
   };
 
-  const handleDeselectAll = () => {
-    setSelected(new Set());
-  };
-
-  const handleContinue = () => {
-    onContinue(Array.from(selected));
-  };
+  const handleSelectAll = () => updateSelection(new Set(repos.map((r) => r.fullName)));
+  const handleDeselectAll = () => updateSelection(new Set());
 
   if (isLoading) {
     return (
-      <Stack spacing={2} role="status" aria-label="Loading repositories">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} variant="rounded" height={56} />
+      <Stack spacing={1}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={48} />
         ))}
       </Stack>
     );
@@ -99,27 +92,20 @@ export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h6" component="h2">
-          Your Repositories ({repos.length})
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          {selected.size} of {repos.length} repositories selected
         </Typography>
         <Stack direction="row" spacing={1}>
-          <Button size="small" onClick={handleSelectAll}>
-            Select All
-          </Button>
-          <Button size="small" onClick={handleDeselectAll}>
-            Deselect All
-          </Button>
+          <Button size="small" onClick={handleSelectAll}>Select All</Button>
+          <Button size="small" onClick={handleDeselectAll}>Deselect All</Button>
         </Stack>
       </Stack>
 
-      <List sx={{ maxHeight: 400, overflow: "auto" }}>
+      <List sx={{ maxHeight: 360, overflow: "auto" }}>
         {repos.map((repo) => (
           <ListItem key={repo.fullName} disablePadding>
-            <ListItemButton
-              onClick={() => handleToggle(repo.fullName)}
-              sx={{ minHeight: 56 }}
-            >
+            <ListItemButton onClick={() => handleToggle(repo.fullName)} sx={{ minHeight: 48 }}>
               <ListItemIcon sx={{ minWidth: 42 }}>
                 <Checkbox
                   edge="start"
@@ -133,16 +119,11 @@ export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
                 primary={repo.name}
                 secondary={repo.lastImportedAt
                   ? `Imported ${formatRelativeTime(repo.lastImportedAt)}`
-                  : `Updated ${formatRelativeTime(repo.updatedAt)}`}
+                  : "Not imported yet"}
               />
               <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: 1 }}>
                 {repo.language && (
                   <Chip label={repo.language} size="small" variant="outlined" />
-                )}
-                {repo.stars > 0 && (
-                  <Typography variant="caption" color="text.secondary">
-                    {repo.stars} stars
-                  </Typography>
                 )}
                 <Chip
                   label={repo.isPrivate ? "Private" : "Public"}
@@ -155,18 +136,6 @@ export function RepoSelectionStep({ onContinue }: RepoSelectionStepProps) {
           </ListItem>
         ))}
       </List>
-
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          variant="contained"
-          size="large"
-          disabled={selected.size === 0}
-          onClick={handleContinue}
-        >
-          Continue ({selected.size} selected)
-        </Button>
-      </Box>
     </Box>
   );
 }
-

@@ -109,6 +109,7 @@ export function ImportSummary({ stats }: ImportSummaryProps) {
             flexWrap="wrap"
             useFlexGap
           >
+            <StatCard icon="📦" count={stats.totalRepositories ?? 0} label="Repos" />
             <StatCard icon="📝" count={stats.totalCommits} label="Commits" />
             <StatCard icon="🔀" count={stats.totalPullRequests} label="Pull Requests" />
             <StatCard icon="👁" count={stats.totalReviews} label="Reviews" />

@@ -48,6 +48,7 @@ describe("GET /api/imports/stats", () => {
   it("returns stats in envelope format for authenticated user", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "user-1" } });
     mockGetGitEventStats.mockResolvedValueOnce({
+      totalRepositories: 12,
       totalCommits: 100,
       totalPullRequests: 25,
       totalReviews: 15,
@@ -64,6 +65,7 @@ describe("GET /api/imports/stats", () => {
 
     expect(response.status).toBe(200);
     expect(body.data).toEqual({
+      totalRepositories: 12,
       totalCommits: 100,
       totalPullRequests: 25,
       totalReviews: 15,
@@ -82,6 +84,7 @@ describe("GET /api/imports/stats", () => {
   it("returns null dates when no events exist", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "user-1" } });
     mockGetGitEventStats.mockResolvedValueOnce({
+      totalRepositories: 0,
       totalCommits: 0,
       totalPullRequests: 0,
       totalReviews: 0,
@@ -102,6 +105,7 @@ describe("GET /api/imports/stats", () => {
   it("calls getGitEventStats with the authenticated user id", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "user-42" } });
     mockGetGitEventStats.mockResolvedValueOnce({
+      totalRepositories: 0,
       totalCommits: 0,
       totalPullRequests: 0,
       totalReviews: 0,
@@ -118,6 +122,7 @@ describe("GET /api/imports/stats", () => {
   it("never includes repository names in response", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "user-1" } });
     mockGetGitEventStats.mockResolvedValueOnce({
+      totalRepositories: 3,
       totalCommits: 5,
       totalPullRequests: 2,
       totalReviews: 1,

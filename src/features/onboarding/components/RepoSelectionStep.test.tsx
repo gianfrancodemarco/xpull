@@ -11,6 +11,7 @@ const mockRepos = [
     stars: 42,
     isPrivate: false,
     updatedAt: new Date().toISOString(),
+    lastImportedAt: new Date().toISOString(),
   },
   {
     name: "repo-two",
@@ -19,6 +20,7 @@ const mockRepos = [
     stars: 0,
     isPrivate: true,
     updatedAt: new Date(Date.now() - 86_400_000 * 5).toISOString(),
+    lastImportedAt: null,
   },
 ];
 

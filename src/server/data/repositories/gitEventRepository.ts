@@ -41,6 +41,7 @@ type GitEventFilters = {
 };
 
 export type GitEventStats = {
+  totalRepositories: number;
   totalCommits: number;
   totalPullRequests: number;
   totalReviews: number;
@@ -52,7 +53,7 @@ export type GitEventStats = {
 export async function getGitEventStats(
   userId: string,
 ): Promise<GitEventStats> {
-  const [counts, dateRange, rawLanguages] = await Promise.all([
+  const [counts, dateRange, rawLanguages, repoCount] = await Promise.all([
     db.gitEvent.groupBy({
       by: ["eventType"],
       where: { userId },
@@ -67,6 +68,7 @@ export async function getGitEventStats(
       where: { userId },
       select: { languages: true },
     }),
+    db.repository.count({ where: { userId } }),
   ]);
 
   const countByType = Object.fromEntries(
@@ -88,6 +90,7 @@ export async function getGitEventStats(
   }
 
   return {
+    totalRepositories: repoCount,
     totalCommits: countByType["commit"] ?? 0,
     totalPullRequests: countByType["pull_request"] ?? 0,
     totalReviews: countByType["review"] ?? 0,

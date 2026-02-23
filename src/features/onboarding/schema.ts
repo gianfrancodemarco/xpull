@@ -7,6 +7,7 @@ export const repoSchema = z.object({
   stars: z.number().int().min(0),
   isPrivate: z.boolean(),
   updatedAt: z.string().datetime(),
+  lastImportedAt: z.string().datetime().nullable(),
 });
 
 export const reposResponseSchema = z.array(repoSchema);

@@ -11,6 +11,9 @@ vi.mock("~/server/db", () => {
         groupBy: vi.fn(),
         aggregate: vi.fn(),
       },
+      repository: {
+        count: vi.fn(),
+      },
     },
   };
 });
@@ -23,6 +26,8 @@ import {
   getGitEventStats,
 } from "./gitEventRepository";
 import { db } from "~/server/db";
+
+const mockRepoCount = (db.repository as unknown as { count: ReturnType<typeof vi.fn> }).count;
 
 const mock = db.gitEvent as unknown as {
   create: ReturnType<typeof vi.fn>;
@@ -170,9 +175,11 @@ describe("gitEventRepository", () => {
         { languages: [{ language: "TypeScript", bytes: 800 }, { language: "Python", bytes: 400 }] },
         { languages: [{ language: "Python", bytes: 200 }] },
       ]);
+      mockRepoCount.mockResolvedValueOnce(7);
 
       const result = await getGitEventStats("user-1");
 
+      expect(result.totalRepositories).toBe(7);
       expect(result.totalCommits).toBe(10);
       expect(result.totalPullRequests).toBe(5);
       expect(result.totalReviews).toBe(3);
@@ -191,9 +198,11 @@ describe("gitEventRepository", () => {
         _max: { occurredAt: null },
       });
       mock.findMany.mockResolvedValueOnce([]);
+      mockRepoCount.mockResolvedValueOnce(0);
 
       const result = await getGitEventStats("user-1");
 
+      expect(result.totalRepositories).toBe(0);
       expect(result.totalCommits).toBe(0);
       expect(result.totalPullRequests).toBe(0);
       expect(result.totalReviews).toBe(0);
@@ -213,6 +222,7 @@ describe("gitEventRepository", () => {
         { languages: [{ language: "Rust", bytes: 300 }, { language: "Go", bytes: 200 }] },
         { languages: [{ language: "Rust", bytes: 100 }, { language: "Go", bytes: 100 }] },
       ]);
+      mockRepoCount.mockResolvedValueOnce(0);
 
       const result = await getGitEventStats("user-1");
 
@@ -233,6 +243,7 @@ describe("gitEventRepository", () => {
         { languages: null },
         { languages: [{ language: "TypeScript", bytes: 100 }] },
       ]);
+      mockRepoCount.mockResolvedValueOnce(0);
 
       const result = await getGitEventStats("user-1");
 

@@ -12,15 +12,21 @@ vi.mock("~/server/lib/github-client", () => ({
   createGitHubClient: vi.fn(),
 }));
 
+vi.mock("~/server/data/repositories/repositoryRepository", () => ({
+  getRepositoriesByUserId: vi.fn(),
+}));
+
 import { GET } from "./route";
 import { auth } from "~/server/auth";
 import { getGitHubAccessToken } from "~/server/lib/github-token";
 import { createGitHubClient } from "~/server/lib/github-client";
+import { getRepositoriesByUserId } from "~/server/data/repositories/repositoryRepository";
 import { AppError, AppErrorCode } from "~/shared/lib/errors";
 
 const mockAuth = auth as ReturnType<typeof vi.fn>;
 const mockGetToken = getGitHubAccessToken as ReturnType<typeof vi.fn>;
 const mockCreateClient = createGitHubClient as ReturnType<typeof vi.fn>;
+const mockGetDbRepos = getRepositoriesByUserId as ReturnType<typeof vi.fn>;
 
 const authenticatedSession = {
   user: { id: "user-1", name: "Test User", email: "test@example.com" },
@@ -28,6 +34,7 @@ const authenticatedSession = {
 
 const mockGitHubRepos = [
   {
+    id: 1001,
     name: "repo-one",
     full_name: "user/repo-one",
     language: "TypeScript",
@@ -36,6 +43,7 @@ const mockGitHubRepos = [
     updated_at: "2026-02-20T12:00:00Z",
   },
   {
+    id: 1002,
     name: "repo-two",
     full_name: "user/repo-two",
     language: null,
@@ -43,6 +51,10 @@ const mockGitHubRepos = [
     private: true,
     updated_at: "2026-02-19T08:00:00Z",
   },
+];
+
+const mockDbRepos = [
+  { externalId: "1001", lastSyncedAt: new Date("2026-02-21T10:00:00Z") },
 ];
 
 beforeEach(() => {
@@ -61,9 +73,10 @@ describe("GET /api/repos", () => {
     expect(body.meta.requestId).toBeDefined();
   });
 
-  it("returns repos in envelope format", async () => {
+  it("returns repos in envelope format with lastImportedAt", async () => {
     mockAuth.mockResolvedValueOnce(authenticatedSession);
     mockGetToken.mockResolvedValueOnce("ghp_token123");
+    mockGetDbRepos.mockResolvedValueOnce(mockDbRepos);
 
     const mockPaginate = vi.fn().mockResolvedValueOnce(mockGitHubRepos);
     const mockOctokit = {
@@ -84,6 +97,7 @@ describe("GET /api/repos", () => {
       stars: 42,
       isPrivate: false,
       updatedAt: "2026-02-20T12:00:00Z",
+      lastImportedAt: "2026-02-21T10:00:00.000Z",
     });
     expect(body.data[1]).toEqual({
       name: "repo-two",
@@ -92,6 +106,7 @@ describe("GET /api/repos", () => {
       stars: 0,
       isPrivate: true,
       updatedAt: "2026-02-19T08:00:00Z",
+      lastImportedAt: null,
     });
     expect(body.meta.requestId).toBeDefined();
     expect(body.meta.timestamp).toBeDefined();
@@ -100,6 +115,7 @@ describe("GET /api/repos", () => {
   it("calls paginate with correct parameters for pagination support", async () => {
     mockAuth.mockResolvedValueOnce(authenticatedSession);
     mockGetToken.mockResolvedValueOnce("ghp_token123");
+    mockGetDbRepos.mockResolvedValueOnce([]);
 
     const mockPaginate = vi.fn().mockResolvedValueOnce([]);
     const listFn = vi.fn();
@@ -146,6 +162,7 @@ describe("GET /api/repos", () => {
   it("returns empty array when user has no repos", async () => {
     mockAuth.mockResolvedValueOnce(authenticatedSession);
     mockGetToken.mockResolvedValueOnce("ghp_token123");
+    mockGetDbRepos.mockResolvedValueOnce([]);
 
     const mockPaginate = vi.fn().mockResolvedValueOnce([]);
     const mockOctokit = {

@@ -59,7 +59,7 @@ export async function processImportJob(jobId: string): Promise<void> {
     const allRepos = await fetchUserRepositories(octokit, rateLimiter);
     const selectedRepoIds = (job.selectedRepoIds as string[] | null) ?? undefined;
     const repos = selectedRepoIds
-      ? allRepos.filter((r) => selectedRepoIds.includes(r.externalId))
+      ? allRepos.filter((r) => selectedRepoIds.includes(`${r.ownerLogin}/${r.name}`))
       : allRepos;
     const totalRepos = repos.length;
     let processedRepos = 0;

@@ -65,47 +65,72 @@ As a newly authenticated developer, I want a guided onboarding wizard that shows
 
 **Acceptance Criteria:**
 
-1. **First-time redirect:** After first GitHub OAuth login, user is redirected to `/onboarding` wizard instead of `/dashboard`. Returning users (who have completed onboarding or have existing import data) go directly to dashboard.
+1. **First-time redirect:** After first GitHub OAuth login, user is redirected to `/onboarding` wizard instead of `/dashboard`. Returning users (who have completed onboarding or have existing import data) go directly to feed/dashboard. Sign-in `callbackUrl` points to `/onboarding`. Middleware sets `x-pathname` header; authenticated layout checks `hasCompletedOnboarding()` to redirect new users.
 
-2. **Step 1 — Repository Selection:** Wizard displays all user-accessible GitHub repos fetched from GitHub API. Each repo shows: name, language, stars, last updated, public/private indicator. User can select/deselect individual repos. "Select All" / "Deselect All" controls available. Minimum 1 repo must be selected to proceed.
+2. **Step 1 — Repository Selection:** Wizard displays all user-accessible GitHub repos fetched from GitHub API. Each repo shows: name, language, stars, last updated/last imported, public/private indicator. User can select/deselect individual repos. "Select All" / "Deselect All" controls available. Minimum 1 repo must be selected to proceed.
 
-3. **Step 2 — Import Kickoff:** After confirming selection, import starts automatically for selected repositories. User sees a transition/loading state ("Preparing your import...") before landing on the status page. Import jobs are created for selected repos (parallel or batched based on worker capacity).
+3. **Step 2 — Import Kickoff:** After confirming selection, import starts automatically for selected repositories. User sees a transition/loading state ("Preparing your import...") before landing on the status page. A single import job is created with `selectedRepoIds` (stored as JSON in the DB) to scope which repos the worker processes.
 
-4. **Step 3 — Import Status:** User lands on an import monitoring page showing progress for their import. Reuses/enhances existing `ImportStatusCard` component to show per-repo or aggregate progress. Live polling (existing `useImportPolling` hook). Shows completion state with summary stats when done. "Go to Dashboard" CTA appears when import completes. User can navigate away at any time — import continues in background.
+4. **Step 3 — Import Status:** User lands on an import monitoring page showing progress for their import. Reuses existing `ImportStatusCard` component. Live polling (existing `useImportPolling` hook). Shows completion state with summary stats when done. "Go to Dashboard" CTA appears when import completes. User can navigate away at any time — import continues in background.
 
-5. **API support:** `GET /api/repos` endpoint returns user's GitHub repositories with metadata (name, language, stars, visibility, updated_at). Import trigger accepts optional selected repository IDs to scope the import.
+5. **API support:** `GET /api/repos` endpoint returns user's GitHub repositories with metadata (name, language, stars, visibility, updated_at, lastImportedAt). The `lastImportedAt` field is populated by cross-referencing GitHub repos with DB repository records (`lastSyncedAt`). Import trigger (`POST /api/imports`) accepts optional `selectedRepoIds` array to scope the import.
 
-6. **Testing:** Vitest unit tests for wizard components and repo selection logic. API tests for `/api/repos` endpoint. Integration test for wizard flow.
+6. **Unified settings page:** Settings merges "Repositories" and "Data Import" into a single "Repositories & Import" card. Repo selection list is at top, import button + status/history below. The import button is disabled until at least one repo is selected. `startImportJob` thunk sends `selectedRepoIds` to the API. The `RepoSelectionCard` component fires `onSelectionChange` on every toggle (no standalone import button).
+
+7. **Repository stats on dashboard:** `totalRepositories` added to `GitEventStats` (counts from `repository` table). Displayed on the dashboard "Collected Data" section and in `ImportSummary`.
+
+8. **Last import time in repo lists:** Each repo in both onboarding and settings views shows "Imported X ago" or "Not imported yet" / "Updated X ago" based on the `lastImportedAt` field from the API.
+
+9. **Worker fix — selectedRepoIds filtering:** The import worker filters repos by `ownerLogin/name` (matching `fullName` from the UI), not by `externalId`. This ensures selected repos are correctly scoped during import.
+
+10. **Testing:** Vitest unit tests for wizard components and repo selection logic. API tests for `/api/repos` endpoint (including `lastImportedAt`). Import dashboard tests updated for `selectedRepoIds` flow. 324+ tests passing.
 
 **Tasks:**
-- Create `GET /api/repos` endpoint using GitHub API (Octokit `repos.listForAuthenticatedUser`)
-- Create `/onboarding` route with wizard step components
-- Create `RepoSelectionStep` component (repo list, select/deselect, metadata display)
-- Create `ImportKickoffStep` component (confirmation, auto-trigger)
-- Create `ImportStatusStep` component (reuse ImportStatusCard/ImportDashboard, add "Go to Dashboard" CTA)
-- Add first-time user detection (check if user has any import jobs or onboarding completion flag)
-- Add redirect logic in authenticated layout or middleware
-- Modify import API to accept selected repository IDs (optional — if not provided, import all as before)
-- Add tests for all new components and API endpoint
+- Create `GET /api/repos` endpoint using GitHub API (Octokit `repos.listForAuthenticatedUser`) with DB cross-reference for `lastImportedAt`
+- Add `selectedRepoIds Json?` field to `ImportJob` model (Prisma migration)
+- Create `/onboarding` route with wizard step components (`OnboardingWizard`, `RepoSelectionStep`, `ImportKickoffStep`, `ImportStatusStep`)
+- Create reusable `RepoSelectionCard` component for settings page (fires `onSelectionChange`)
+- Create shared `repoFormatUtils.ts` for relative time formatting
+- Add first-time user detection (`hasCompletedOnboarding()` — checks `ImportJob` count)
+- Add middleware to set `x-pathname` header; authenticated layout redirects new users to `/onboarding`
+- Modify import API to accept `selectedRepoIds`; worker filters by `ownerLogin/name`
+- Unify settings page — single "Repositories & Import" card with repo selection + import dashboard
+- Add `totalRepositories` to stats endpoint, dashboard, and `ImportSummary`
+- Update `startImportJob` thunk to accept and send `selectedRepoIds`
+- Add tests for all new components and API endpoints
+- Update sign-in page copy to be less technical, `callbackUrl` to `/onboarding`
 
 **Dev Notes:**
-- GitHub API: `octokit.repos.listForAuthenticatedUser({ per_page: 100, sort: 'updated' })` — paginate if needed
+- GitHub API: `octokit.repos.listForAuthenticatedUser({ per_page: 100, sort: 'updated' })` with pagination
 - First-time detection: check `ImportJob` table for user — if no records, redirect to onboarding
-- Parallel import: current worker architecture processes repos within a single import job. Consider whether to create one job per repo (true parallelism) or keep single job with selected repos list. Single job is simpler for MVP.
+- Single import job with `selectedRepoIds` JSON field — worker filters `allRepos` by `ownerLogin/name` match
 - The wizard is a natural precursor to the Unboxing (Epic 5). The import status page could later transition into the Unboxing cascade when data is ready.
 - Existing components in `src/features/imports/components/` handle polling, status display, retry, and summary — reuse heavily
+- `RepoSelectionCard` and `RepoSelectionStep` share `repoFormatUtils.ts` for consistent time formatting
 
 ## Section 5: Implementation Handoff
 
 **Scope Classification:** Minor — direct implementation by development team.
 
-**Dependencies:** Stories 2.1 (import pipeline) should be complete. Story 1.5 (nav shell) provides the layout context.
+**Status:** ✅ Implemented (2026-02-23)
 
-**Success Criteria:**
-- First-time users are guided through repo selection → import → status monitoring
-- Import starts automatically without user needing to find a button in settings
-- User can monitor import progress and navigate to dashboard when ready
-- Returning users bypass the wizard and go to dashboard
-- Existing import functionality (retry, polling, status) still works
+**Dependencies:** Stories 2.1 (import pipeline) complete. Story 1.5 (nav shell) provides the layout context.
 
-**Routed to:** Development team for direct implementation.
+**Success Criteria — All Met:**
+- ✅ First-time users are guided through repo selection → import → status monitoring
+- ✅ Import starts automatically without user needing to find a button in settings
+- ✅ User can monitor import progress and navigate to dashboard when ready
+- ✅ Returning users bypass the wizard and go to feed/dashboard
+- ✅ Existing import functionality (retry, polling, status) still works
+- ✅ Settings page unified — repo selection + import in single card
+- ✅ Repo list shows last import time for each repository
+- ✅ Dashboard shows repository count in collected data stats
+- ✅ Sign-in page copy updated to be less technical and more engaging
+- ✅ 324+ tests passing, 0 regressions
+
+**Key Implementation Details:**
+- Branch: `story/2-5-onboarding-import-wizard`
+- PR: #33
+- New files: `OnboardingWizard.tsx`, `RepoSelectionStep.tsx`, `ImportKickoffStep.tsx`, `ImportStatusStep.tsx`, `RepoSelectionCard.tsx`, `repoFormatUtils.ts`, `onboarding.ts`, `GET /api/repos`
+- Modified: `import-history.job.ts` (selectedRepoIds filter fix), `ImportDashboard.tsx` (accepts selectedRepoIds), `importsSlice.ts` (startImportJob accepts selectedRepoIds), `gitEventRepository.ts` (totalRepositories), settings page (unified card), sign-in page (copy + callbackUrl), middleware (x-pathname header), authenticated layout (onboarding redirect)
+- Migration: `add_selected_repo_ids_to_import_job` (adds `selected_repo_ids JSONB` to `import_jobs` table)
