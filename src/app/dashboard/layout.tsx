@@ -1,4 +1,5 @@
 import React from "react";
+import Box from "@mui/material/Box";
 
 import TopAppBar from "~/shared/ui/nav/AppBar";
 import { auth } from "~/server/auth";
@@ -10,7 +11,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div>
       <TopAppBar user={user} />
-      <main style={{ paddingTop: 8 }}>{children}</main>
+      <Box component="main" sx={{ pt: 1 }}>
+        {children}
+      </Box>
     </div>
   );
 }
