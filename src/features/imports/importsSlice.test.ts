@@ -4,6 +4,7 @@ import importsReducer, {
   fetchImportJobs,
   fetchImportStats,
   retryImportJob,
+  startImportJob,
   setPolling,
 } from "./importsSlice";
 import type { ImportsState } from "./importsSlice";
@@ -12,6 +13,7 @@ import {
   selectLatestImportJob,
   selectImportStats,
   selectIsImportInProgress,
+  selectIsStartingImport,
   selectImportsLoading,
   selectImportsError,
   selectFormattedStatus,
@@ -27,6 +29,7 @@ function createTestStore(preloadedImports?: Partial<ImportsState>) {
             stats: null,
             isLoading: false,
             isPolling: false,
+            isStarting: false,
             error: null,
             ...preloadedImports,
           },
@@ -71,6 +74,7 @@ describe("importsSlice", () => {
       expect(state.stats).toBeNull();
       expect(state.isLoading).toBe(false);
       expect(state.isPolling).toBe(false);
+      expect(state.isStarting).toBe(false);
       expect(state.error).toBeNull();
     });
   });
@@ -226,6 +230,107 @@ describe("importsSlice", () => {
       );
     });
   });
+
+  describe("startImportJob thunk", () => {
+    it("calls POST /api/imports", async () => {
+      const newJob = { ...mockJob, id: "job-new", status: "pending" as const };
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: newJob }),
+        }),
+      );
+
+      const store = createTestStore();
+      await store.dispatch(startImportJob());
+
+      expect(fetch).toHaveBeenCalledWith("/api/imports", { method: "POST" });
+    });
+
+    it("sets isStarting true on pending", async () => {
+      let resolvePromise: (value: unknown) => void;
+      const pendingPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockReturnValue(pendingPromise),
+      );
+
+      const store = createTestStore();
+      const promise = store.dispatch(startImportJob());
+
+      expect(store.getState().imports.isStarting).toBe(true);
+      expect(store.getState().imports.error).toBeNull();
+
+      resolvePromise!({
+        ok: true,
+        json: () => Promise.resolve({ data: mockJob }),
+      });
+      await promise;
+    });
+
+    it("sets isStarting false on fulfilled", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: mockJob }),
+        }),
+      );
+
+      const store = createTestStore();
+      await store.dispatch(startImportJob());
+
+      expect(store.getState().imports.isStarting).toBe(false);
+    });
+
+    it("dispatches fetchImportJobs on success", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: mockJob }),
+        }),
+      );
+
+      const store = createTestStore();
+      await store.dispatch(startImportJob());
+
+      const fetchCalls = (fetch as ReturnType<typeof vi.fn>).mock.calls;
+      expect(fetchCalls.some((c: string[]) => c[0] === "/api/imports" && c.length === 1)).toBe(true);
+    });
+
+    it("sets isStarting false and error on rejected", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({ ok: false, status: 500 }),
+      );
+
+      const store = createTestStore();
+      await store.dispatch(startImportJob());
+
+      expect(store.getState().imports.isStarting).toBe(false);
+      expect(store.getState().imports.error).toBe("Failed to start import");
+    });
+
+    it("clears previous error on pending", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: mockJob }),
+        }),
+      );
+
+      const store = createTestStore({ error: "Previous error" });
+      await store.dispatch(startImportJob());
+
+      expect(store.getState().imports.error).toBeNull();
+    });
+  });
 });
 
 describe("selectors", () => {
@@ -267,6 +372,16 @@ describe("selectors", () => {
   it("selectIsImportInProgress returns false for completed jobs only", () => {
     const state = { imports: { ...createTestStore({ jobs: [mockJob] }).getState().imports } };
     expect(selectIsImportInProgress(state)).toBe(false);
+  });
+
+  it("selectIsStartingImport returns isStarting state", () => {
+    const state = { imports: { ...createTestStore({ isStarting: true }).getState().imports } };
+    expect(selectIsStartingImport(state)).toBe(true);
+  });
+
+  it("selectIsStartingImport returns false by default", () => {
+    const state = { imports: { ...createTestStore().getState().imports } };
+    expect(selectIsStartingImport(state)).toBe(false);
   });
 
   it("selectImportsLoading returns loading state", () => {

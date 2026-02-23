@@ -27,6 +27,11 @@ export const selectIsImportInProgress = createSelector(
   (jobs) => jobs.some((j) => j.status === "pending" || j.status === "in_progress"),
 );
 
+export const selectIsStartingImport = createSelector(
+  selectImportsState,
+  (s) => s.isStarting,
+);
+
 export const selectImportsLoading = createSelector(
   selectImportsState,
   (s) => s.isLoading,

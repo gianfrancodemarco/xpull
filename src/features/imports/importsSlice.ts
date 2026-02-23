@@ -6,6 +6,7 @@ export type ImportsState = {
   stats: ImportStatsResponse | null;
   isLoading: boolean;
   isPolling: boolean;
+  isStarting: boolean;
   error: string | null;
 };
 
@@ -14,6 +15,7 @@ const initialState: ImportsState = {
   stats: null,
   isLoading: false,
   isPolling: false,
+  isStarting: false,
   error: null,
 };
 
@@ -46,6 +48,17 @@ export const retryImportJob = createAsyncThunk(
     if (!res.ok) throw new Error("Failed to retry import job");
     const body = await res.json();
     return body.data as { id: string; status: string };
+  },
+);
+
+export const startImportJob = createAsyncThunk(
+  "imports/startJob",
+  async (_, { dispatch }) => {
+    const res = await fetch("/api/imports", { method: "POST" });
+    if (!res.ok) throw new Error("Failed to start import");
+    const body = await res.json();
+    void dispatch(fetchImportJobs());
+    return body.data as ImportJobResponse;
   },
 );
 
@@ -96,6 +109,18 @@ const importsSlice = createSlice({
       })
       .addCase(retryImportJob.rejected, (state, action) => {
         state.error = action.error.message ?? "Failed to retry import job";
+      })
+
+      .addCase(startImportJob.pending, (state) => {
+        state.isStarting = true;
+        state.error = null;
+      })
+      .addCase(startImportJob.fulfilled, (state) => {
+        state.isStarting = false;
+      })
+      .addCase(startImportJob.rejected, (state, action) => {
+        state.isStarting = false;
+        state.error = action.error.message ?? "Failed to start import";
       });
   },
 });
