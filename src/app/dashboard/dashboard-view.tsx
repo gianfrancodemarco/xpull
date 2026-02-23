@@ -139,30 +139,36 @@ export default function DashboardView({ userName, userEmail, userAvatar }: Dashb
           </CardContent>
         </Card>
 
-        {/* Feed Preview — Milestone Card Placeholders */}
+        {/* Feed Preview — Team Activity */}
         <Box>
           <Typography
             variant="h6"
             sx={{ fontFamily: tokens.typography.heading, mb: 2 }}
           >
-            Story Feed Preview
+            Team Activity
           </Typography>
           <Stack spacing={2}>
             {[
               {
-                title: "Level Up!",
-                description: "You crossed a major XP threshold — new abilities unlocked.",
+                author: "Alice Chen",
+                title: "Reached Level 12!",
+                description: "Crossed the 4,800 XP threshold after consistent contributions across 3 repos.",
                 label: "milestone",
+                time: "2h ago",
               },
               {
-                title: "New Badge Unlocked",
-                description: "Consistent contributions earned you the Streak Master badge.",
+                author: "Bob Martinez",
+                title: "Streak Master Badge",
+                description: "Maintained a 30-day contribution streak — commits, reviews, and PR feedback every day.",
                 label: "achievement",
+                time: "5h ago",
               },
               {
-                title: "Skill Branch Growing",
-                description: "Your TypeScript branch extended with 12 new nodes this week.",
+                author: "Carol Park",
+                title: "TypeScript Branch Extended",
+                description: "12 new skill nodes unlocked this week in the TypeScript branch.",
                 label: "milestone",
+                time: "Yesterday",
               },
             ].map((card) => (
               <Card
@@ -173,6 +179,24 @@ export default function DashboardView({ userName, userEmail, userAvatar }: Dashb
                 }}
               >
                 <CardContent>
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: "0.7rem",
+                        bgcolor: tokens.colors.primary,
+                      }}
+                    >
+                      {card.author.split(" ").map((w) => w[0]).join("")}
+                    </Avatar>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {card.author}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {card.time}
+                    </Typography>
+                  </Stack>
                   <Chip
                     label={card.label}
                     size="small"

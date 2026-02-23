@@ -81,7 +81,7 @@ describe("DashboardView", () => {
     expect(screen.getByText(/xp tracking coming in epic 3/i)).toBeInTheDocument();
   });
 
-  it("renders feed preview with placeholder milestone cards", async () => {
+  it("renders team activity feed preview with author names", async () => {
     setupFetchMock();
     const store = createStore();
 
@@ -93,10 +93,13 @@ describe("DashboardView", () => {
       );
     });
 
-    expect(screen.getByText("Story Feed Preview")).toBeInTheDocument();
-    expect(screen.getByText("Level Up!")).toBeInTheDocument();
-    expect(screen.getByText("New Badge Unlocked")).toBeInTheDocument();
-    expect(screen.getByText("Skill Branch Growing")).toBeInTheDocument();
+    expect(screen.getByText("Team Activity")).toBeInTheDocument();
+    expect(screen.getByText("Alice Chen")).toBeInTheDocument();
+    expect(screen.getByText("Bob Martinez")).toBeInTheDocument();
+    expect(screen.getByText("Carol Park")).toBeInTheDocument();
+    expect(screen.getByText("Reached Level 12!")).toBeInTheDocument();
+    expect(screen.getByText("Streak Master Badge")).toBeInTheDocument();
+    expect(screen.getByText("TypeScript Branch Extended")).toBeInTheDocument();
   });
 
   it("shows real collected data when import stats are available", async () => {

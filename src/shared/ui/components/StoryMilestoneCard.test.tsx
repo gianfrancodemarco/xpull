@@ -18,7 +18,7 @@ describe("StoryMilestoneCard", () => {
     expect(screen.getByText("milestone")).toBeInTheDocument();
   });
 
-  it("renders timestamp when provided", () => {
+  it("renders timestamp when provided without author", () => {
     render(
       <StoryMilestoneCard
         title="Badge Unlocked"
@@ -72,5 +72,47 @@ describe("StoryMilestoneCard", () => {
     );
 
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
+  });
+
+  it("renders author name and avatar when provided", () => {
+    render(
+      <StoryMilestoneCard
+        title="Level Up!"
+        description="Alice reached level 12."
+        label="milestone"
+        author={{ name: "Alice Chen", avatar: "/alice.png" }}
+      />,
+    );
+
+    expect(screen.getByText("Alice Chen")).toBeInTheDocument();
+    expect(screen.getByAltText("Alice Chen")).toBeInTheDocument();
+  });
+
+  it("renders author initials when no avatar url", () => {
+    render(
+      <StoryMilestoneCard
+        title="Achievement"
+        description="Great work."
+        label="achievement"
+        author={{ name: "Bob Martinez" }}
+      />,
+    );
+
+    expect(screen.getByText("BM")).toBeInTheDocument();
+  });
+
+  it("shows timestamp next to author name when both provided", () => {
+    render(
+      <StoryMilestoneCard
+        title="Test"
+        description="Desc"
+        label="milestone"
+        author={{ name: "Carol Park" }}
+        timestamp="3 hours ago"
+      />,
+    );
+
+    expect(screen.getByText("Carol Park")).toBeInTheDocument();
+    expect(screen.getByText("3 hours ago")).toBeInTheDocument();
   });
 });

@@ -1,15 +1,22 @@
 "use client";
 
 import React from "react";
+import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { tokens } from "~/shared/ui/theme/tokens";
 
 type StoryMilestoneCardVariant = "milestone" | "achievement" | "placeholder";
+
+type StoryMilestoneCardAuthor = {
+  name: string;
+  avatar?: string;
+};
 
 type StoryMilestoneCardProps = {
   title: string;
@@ -18,6 +25,7 @@ type StoryMilestoneCardProps = {
   label: string;
   action?: { label: string; onClick: () => void };
   variant?: StoryMilestoneCardVariant;
+  author?: StoryMilestoneCardAuthor;
 };
 
 const variantColors: Record<StoryMilestoneCardVariant, { bg: string; text: string }> = {
@@ -26,6 +34,15 @@ const variantColors: Record<StoryMilestoneCardVariant, { bg: string; text: strin
   placeholder: { bg: "rgba(234, 240, 255, 0.08)", text: tokens.colors.textSecondary },
 };
 
+function authorInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 export function StoryMilestoneCard({
   title,
   description,
@@ -33,6 +50,7 @@ export function StoryMilestoneCard({
   label,
   action,
   variant = "milestone",
+  author,
 }: StoryMilestoneCardProps) {
   const colors = variantColors[variant];
 
@@ -43,6 +61,30 @@ export function StoryMilestoneCard({
       }}
     >
       <CardContent>
+        {author && (
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+            <Avatar
+              src={author.avatar}
+              alt={author.name}
+              sx={{
+                width: 32,
+                height: 32,
+                fontSize: "0.8rem",
+                bgcolor: tokens.colors.primary,
+              }}
+            >
+              {!author.avatar && authorInitials(author.name)}
+            </Avatar>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {author.name}
+            </Typography>
+            {timestamp && (
+              <Typography variant="caption" color="text.secondary">
+                {timestamp}
+              </Typography>
+            )}
+          </Stack>
+        )}
         <Chip
           label={label}
           size="small"
@@ -61,7 +103,7 @@ export function StoryMilestoneCard({
         <Typography variant="body2" color="text.secondary">
           {description}
         </Typography>
-        {timestamp && (
+        {!author && timestamp && (
           <Typography variant="caption" sx={{ mt: 1, display: "block" }}>
             {timestamp}
           </Typography>
