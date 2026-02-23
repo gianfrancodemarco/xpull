@@ -3,11 +3,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import type { TypedUseSelectorHook } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";
-
-const rootReducer = (state: Record<string, never> = {}) => state;
+import importsReducer from "~/features/imports/importsSlice";
 
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    imports: importsReducer,
+  },
   devTools: process.env.NODE_ENV !== "production",
 });
 
