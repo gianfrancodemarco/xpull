@@ -48,7 +48,7 @@ beforeEach(() => {
 });
 
 describe("DashboardView", () => {
-  it("renders hero copy and stats", async () => {
+  it("renders identity hero with user info", async () => {
     setupFetchMock();
     const store = createStore();
 
@@ -60,10 +60,43 @@ describe("DashboardView", () => {
       );
     });
 
-    expect(screen.getByRole("heading", { name: /story feed ready for jamie/i })).toBeInTheDocument();
-    expect(screen.getByText(/weekly progress check/i)).toBeInTheDocument();
-    expect(screen.getByText(/refresh feed/i)).toBeInTheDocument();
-    expect(screen.getByText(/jamie@example.com/i)).toBeInTheDocument();
+    expect(screen.getByText("Jamie")).toBeInTheDocument();
+    expect(screen.getByText("jamie@example.com")).toBeInTheDocument();
+    expect(screen.getByAltText("Jamie avatar")).toBeInTheDocument();
+  });
+
+  it("renders What Changed panel with coming soon state", async () => {
+    setupFetchMock();
+    const store = createStore();
+
+    await act(async () => {
+      render(
+        <Provider store={store}>
+          <DashboardView userName="Jamie" />
+        </Provider>,
+      );
+    });
+
+    expect(screen.getByText("What Changed")).toBeInTheDocument();
+    expect(screen.getByText(/xp tracking coming in epic 3/i)).toBeInTheDocument();
+  });
+
+  it("renders feed preview with placeholder milestone cards", async () => {
+    setupFetchMock();
+    const store = createStore();
+
+    await act(async () => {
+      render(
+        <Provider store={store}>
+          <DashboardView userName="Jamie" />
+        </Provider>,
+      );
+    });
+
+    expect(screen.getByText("Story Feed Preview")).toBeInTheDocument();
+    expect(screen.getByText("Level Up!")).toBeInTheDocument();
+    expect(screen.getByText("New Badge Unlocked")).toBeInTheDocument();
+    expect(screen.getByText("Skill Branch Growing")).toBeInTheDocument();
   });
 
   it("shows real collected data when import stats are available", async () => {
@@ -114,28 +147,19 @@ describe("DashboardView", () => {
     });
   });
 
-  it("still renders hero and feed sections even without import data", async () => {
-    const emptyStats = {
-      totalCommits: 0,
-      totalPullRequests: 0,
-      totalReviews: 0,
-      languages: [],
-      earliestEventDate: null,
-      latestEventDate: null,
-    };
-    setupFetchMock(emptyStats);
+  it("renders placeholder level and league badges", async () => {
+    setupFetchMock();
     const store = createStore();
 
     await act(async () => {
       render(
         <Provider store={store}>
-          <DashboardView userName="Jamie" userEmail="jamie@example.com" userAvatar="/avatar.png" />
+          <DashboardView userName="Jamie" />
         </Provider>,
       );
     });
 
-    expect(screen.getByRole("heading", { name: /story feed ready for jamie/i })).toBeInTheDocument();
-    expect(screen.getByText(/weekly progress check/i)).toBeInTheDocument();
-    expect(screen.getByText(/what changed since yesterday/i)).toBeInTheDocument();
+    expect(screen.getByText(/level — coming soon/i)).toBeInTheDocument();
+    expect(screen.getByText(/league — coming soon/i)).toBeInTheDocument();
   });
 });
