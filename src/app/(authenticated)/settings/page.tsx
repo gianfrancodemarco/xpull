@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { Typography, Divider, Stack, Box } from "@mui/material";
 import RepositoryAccessList from "~/features/auth/components/RepositoryAccessList";
+import { ImportDashboard } from "~/features/imports/components/ImportDashboard";
 
 type Repo = { id: string; name: string; full_name: string; allowed: boolean };
 
@@ -56,10 +58,29 @@ export default function SettingsPage() {
   }
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Settings</h1>
-      {loading ? <div>Loading...</div> : null}
-      <RepositoryAccessList repos={repos} onToggle={handleToggle} onDisconnect={handleDisconnect} />
-    </main>
+    <Box component="main" sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Settings
+      </Typography>
+
+      <Stack spacing={4}>
+        <Box>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Data Import
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <ImportDashboard />
+        </Box>
+
+        <Box>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Repository Access
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          {loading ? <div>Loading...</div> : null}
+          <RepositoryAccessList repos={repos} onToggle={handleToggle} onDisconnect={handleDisconnect} />
+        </Box>
+      </Stack>
+    </Box>
   );
 }
