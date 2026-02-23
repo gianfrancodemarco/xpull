@@ -13,8 +13,8 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
 
   if (session?.user?.id) {
     const headersList = await headers();
-    const pathname = headersList.get("x-onboarding-pathname") ?? "";
-    const isOnboardingRoute = pathname === "true";
+    const pathname = headersList.get("x-pathname") ?? "";
+    const isOnboardingRoute = pathname.startsWith("/onboarding");
 
     if (!isOnboardingRoute) {
       const onboarded = await hasCompletedOnboarding(session.user.id);
