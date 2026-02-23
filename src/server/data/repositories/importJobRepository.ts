@@ -1,9 +1,15 @@
 import type { ImportJobStatus } from "../../../../generated/prisma";
 import { db } from "~/server/db";
 
-export async function createImportJob(userId: string) {
+export async function createImportJob(
+  userId: string,
+  selectedRepoIds?: string[],
+) {
   return db.importJob.create({
-    data: { userId },
+    data: {
+      userId,
+      ...(selectedRepoIds && { selectedRepoIds }),
+    },
   });
 }
 

@@ -80,10 +80,27 @@ describe("POST /api/imports", () => {
     expect(body.data.status).toBe("pending");
     expect(body.meta.requestId).toBeDefined();
     expect(body.meta.timestamp).toBeDefined();
-    expect(mockCreateImportJob).toHaveBeenCalledWith("user-1");
+    expect(mockCreateImportJob).toHaveBeenCalledWith("user-1", undefined);
   });
 
-  it("works with empty body", async () => {
+  it("passes selectedRepoIds to createImportJob when provided", async () => {
+    mockAuth.mockResolvedValueOnce(authenticatedSession);
+    mockCreateImportJob.mockResolvedValueOnce(mockJob);
+
+    const selectedRepoIds = ["123", "456", "789"];
+    const request = new Request("http://localhost/api/imports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selectedRepoIds }),
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(201);
+    expect(mockCreateImportJob).toHaveBeenCalledWith("user-1", selectedRepoIds);
+  });
+
+  it("works with empty body (backward compatible)", async () => {
     mockAuth.mockResolvedValueOnce(authenticatedSession);
     mockCreateImportJob.mockResolvedValueOnce(mockJob);
 
@@ -93,6 +110,7 @@ describe("POST /api/imports", () => {
 
     const response = await POST(request);
     expect(response.status).toBe(201);
+    expect(mockCreateImportJob).toHaveBeenCalledWith("user-1", undefined);
   });
 });
 

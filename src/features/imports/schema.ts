@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const createImportJobSchema = z.object({}).optional();
+export const createImportJobSchema = z
+  .object({
+    selectedRepoIds: z.array(z.string()).optional(),
+  })
+  .optional();
 
 export const importJobResponseSchema = z.object({
   id: z.string(),

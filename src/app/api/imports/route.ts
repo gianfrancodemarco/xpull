@@ -20,6 +20,8 @@ export async function POST(request: Request) {
     );
   }
 
+  let selectedRepoIds: string[] | undefined;
+
   try {
     const body = await request.json().catch(() => undefined);
     const parsed = createImportJobSchema.safeParse(body);
@@ -36,11 +38,13 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    selectedRepoIds = parsed.data?.selectedRepoIds;
   } catch {
     // Body parsing is optional for this endpoint
   }
 
-  const job = await createImportJob(session.user.id);
+  const job = await createImportJob(session.user.id, selectedRepoIds);
 
   void processImportJob(job.id).catch(console.error);
 

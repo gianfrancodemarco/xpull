@@ -47,6 +47,19 @@ describe("importJobRepository", () => {
       expect(mock.create).toHaveBeenCalledWith({ data: { userId } });
       expect(result).toEqual(mockJob);
     });
+
+    it("creates a job with selectedRepoIds when provided", async () => {
+      const selectedRepoIds = ["123", "456"];
+      const mockJob = { id: jobId, userId, status: "pending", selectedRepoIds };
+      mock.create.mockResolvedValueOnce(mockJob);
+
+      const result = await createImportJob(userId, selectedRepoIds);
+
+      expect(mock.create).toHaveBeenCalledWith({
+        data: { userId, selectedRepoIds },
+      });
+      expect(result).toEqual(mockJob);
+    });
   });
 
   describe("getImportJobById", () => {
