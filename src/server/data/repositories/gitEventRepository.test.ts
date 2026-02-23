@@ -75,7 +75,7 @@ describe("gitEventRepository", () => {
 
       const result = await createGitEvents(events);
 
-      expect(mock.createMany).toHaveBeenCalledWith({ data: events });
+      expect(mock.createMany).toHaveBeenCalledWith({ data: events, skipDuplicates: true });
       expect(result.count).toBe(2);
     });
   });

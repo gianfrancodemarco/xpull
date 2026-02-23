@@ -20,7 +20,7 @@ export async function createGitEvent(data: CreateGitEventData) {
 }
 
 export async function createGitEvents(dataArray: CreateGitEventData[]) {
-  return db.gitEvent.createMany({ data: dataArray });
+  return db.gitEvent.createMany({ data: dataArray, skipDuplicates: true });
 }
 
 export async function gitEventExists(userId: string, externalId: string) {
