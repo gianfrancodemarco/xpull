@@ -8,6 +8,8 @@ vi.mock("~/server/db", () => {
         createMany: vi.fn(),
         findUnique: vi.fn(),
         findMany: vi.fn(),
+        groupBy: vi.fn(),
+        aggregate: vi.fn(),
       },
     },
   };
@@ -18,6 +20,7 @@ import {
   createGitEvents,
   gitEventExists,
   getGitEventsByUserId,
+  getGitEventStats,
 } from "./gitEventRepository";
 import { db } from "~/server/db";
 
@@ -26,6 +29,8 @@ const mock = db.gitEvent as unknown as {
   createMany: ReturnType<typeof vi.fn>;
   findUnique: ReturnType<typeof vi.fn>;
   findMany: ReturnType<typeof vi.fn>;
+  groupBy: ReturnType<typeof vi.fn>;
+  aggregate: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
@@ -146,6 +151,92 @@ describe("gitEventRepository", () => {
         where: { userId: "user-1", repositoryId: "repo-1" },
         orderBy: { occurredAt: "desc" },
       });
+    });
+  });
+
+  describe("getGitEventStats", () => {
+    it("returns aggregated stats with events of each type", async () => {
+      mock.groupBy.mockResolvedValueOnce([
+        { eventType: "commit", _count: { id: 10 } },
+        { eventType: "pull_request", _count: { id: 5 } },
+        { eventType: "review", _count: { id: 3 } },
+      ]);
+      mock.aggregate.mockResolvedValueOnce({
+        _min: { occurredAt: new Date("2025-01-01") },
+        _max: { occurredAt: new Date("2026-02-01") },
+      });
+      mock.findMany.mockResolvedValueOnce([
+        { languages: [{ language: "TypeScript", bytes: 1200 }] },
+        { languages: [{ language: "TypeScript", bytes: 800 }, { language: "Python", bytes: 400 }] },
+        { languages: [{ language: "Python", bytes: 200 }] },
+      ]);
+
+      const result = await getGitEventStats("user-1");
+
+      expect(result.totalCommits).toBe(10);
+      expect(result.totalPullRequests).toBe(5);
+      expect(result.totalReviews).toBe(3);
+      expect(result.languages).toEqual([
+        { language: "TypeScript", count: 2 },
+        { language: "Python", count: 2 },
+      ]);
+      expect(result.earliestEventDate).toEqual(new Date("2025-01-01"));
+      expect(result.latestEventDate).toEqual(new Date("2026-02-01"));
+    });
+
+    it("returns zeros for empty data", async () => {
+      mock.groupBy.mockResolvedValueOnce([]);
+      mock.aggregate.mockResolvedValueOnce({
+        _min: { occurredAt: null },
+        _max: { occurredAt: null },
+      });
+      mock.findMany.mockResolvedValueOnce([]);
+
+      const result = await getGitEventStats("user-1");
+
+      expect(result.totalCommits).toBe(0);
+      expect(result.totalPullRequests).toBe(0);
+      expect(result.totalReviews).toBe(0);
+      expect(result.languages).toEqual([]);
+      expect(result.earliestEventDate).toBeNull();
+      expect(result.latestEventDate).toBeNull();
+    });
+
+    it("aggregates languages across multiple events and sorts by count descending", async () => {
+      mock.groupBy.mockResolvedValueOnce([]);
+      mock.aggregate.mockResolvedValueOnce({
+        _min: { occurredAt: null },
+        _max: { occurredAt: null },
+      });
+      mock.findMany.mockResolvedValueOnce([
+        { languages: [{ language: "Go", bytes: 500 }] },
+        { languages: [{ language: "Rust", bytes: 300 }, { language: "Go", bytes: 200 }] },
+        { languages: [{ language: "Rust", bytes: 100 }, { language: "Go", bytes: 100 }] },
+      ]);
+
+      const result = await getGitEventStats("user-1");
+
+      expect(result.languages).toEqual([
+        { language: "Go", count: 3 },
+        { language: "Rust", count: 2 },
+      ]);
+    });
+
+    it("handles events with non-array languages gracefully", async () => {
+      mock.groupBy.mockResolvedValueOnce([]);
+      mock.aggregate.mockResolvedValueOnce({
+        _min: { occurredAt: null },
+        _max: { occurredAt: null },
+      });
+      mock.findMany.mockResolvedValueOnce([
+        { languages: "invalid" },
+        { languages: null },
+        { languages: [{ language: "TypeScript", bytes: 100 }] },
+      ]);
+
+      const result = await getGitEventStats("user-1");
+
+      expect(result.languages).toEqual([{ language: "TypeScript", count: 1 }]);
     });
   });
 
