@@ -1,29 +1,82 @@
-# Create T3 App
+# xpull
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+**xpull** is a web platform that gamifies the developer experience using Git data. Developers connect their GitHub account and have their real-world coding activity — commits, pull requests, code reviews — turned into a progression system with XP, levels, skill trees, and social features. It’s a positive, anti-hustle layer on top of the work developers already do.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Screenshots
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+![Login](./docs/screenshots/login.png)
+![Import](./docs/screenshots/import.png)
+![Dashboard](./docs/screenshots/dashboard.png)
+![Feed](./docs/screenshots/feed.png)
+![Settings](./docs/screenshots/settings.png)
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
 
-## Learn More
+## Features
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+| Feature                                                             | Status                        |
+| ------------------------------------------------------------------- | ----------------------------- |
+| GitHub OAuth sign-in                                                | ✅ Implemented                 |
+| Onboarding wizard (repo selection + historical import)              | ✅ Implemented                 |
+| Dashboard — identity, collected data (repos, commits, PRs, reviews) | ✅ Implemented                 |
+| Settings — repository selection, import jobs, disconnect GitHub     | ✅ Implemented                 |
+| Story Feed page (layout + “What Changed” panel)                     | ✅ Implemented                 |
+| GitHub webhook ingestion (incremental sync)                         | ✅ Implemented                 |
+| Level & league                                                      | ⏳ Placeholder badges only     |
+| XP tracking                                                         | ❌ Not implemented (Epic 3)    |
+| Skill trees                                                         | ❌ Not built; copy only        |
+| Story Feed "Recent Activity"                                        | ⏳ Mock data                   |
+| Dashboard "Team Activity"                                           | ⏳ Hardcoded placeholder cards |
+| Quest / weekly cards                                                | ⏳ Placeholder                 |
+| AI avatars                                                          | ❌ Not implemented             |
+| Public profile & OG sharing                                         | ❌ Not implemented             |
+| Pulls (social appreciation)                                         | ❌ Not implemented             |
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
 
-## How do I deploy this?
+---
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Local setup (Docker Compose)
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+- [pnpm](https://pnpm.io/) (optional; only if you run the app outside Docker)
+
+### 1. Clone and configure environment
+
+```bash
+git clone <repo-url>
+cd xpull
+cp .env.example .env
+```
+
+Edit `.env` and set at least:
+
+- `**AUTH_SECRET**` — any random string (e.g. `openssl rand -base64 32`)
+- `**AUTH_GITHUB_ID**` and `**AUTH_GITHUB_SECRET**` — from [GitHub OAuth Apps](https://github.com/settings/developers) (use `http://localhost:3000` as callback URL)
+- `**NEXTAUTH_URL**` — leave as `http://localhost:3000` for local dev
+
+Optional for webhooks: set `**GITHUB_WEBHOOK_SECRET**` if you want to receive GitHub webhooks locally.
+
+### 2. Start the stack
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+- **PostgreSQL** on `localhost:5432` (user: `xpull`, password: `xpull_dev`, DB: `xpull_dev`)
+- **Web app** (Next.js) on [http://localhost:3000](http://localhost:3000)
+
+Migrations run automatically on startup. Open the app in the browser and sign in with GitHub.
+
+### 3. Stop
+
+```bash
+docker compose down
+```
+
+Data is kept in a Docker volume; use `docker compose down -v` to remove it.
